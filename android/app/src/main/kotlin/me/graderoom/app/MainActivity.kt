@@ -1,6 +1,7 @@
-package com.jothiprakasam.graderoom_app
+package me.graderoom.app
 
 import io.flutter.embedding.android.FlutterActivity
 
 class MainActivity: FlutterActivity() {
+
 }
