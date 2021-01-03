@@ -9,10 +9,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^0.12.2
+  path_provider: ^1.6.24
   provider: ^4.3.2+3
   settings_ui: ^0.5.0
   cupertino_icons: ^1.0.0
+  dio: ^3.0.10
+  dio_cookie_manager: ^1.0.0
+  keyboard_visibility: ^0.5.6
+  sembast: ^2.4.8+1
 
 dev_dependencies:
   flutter_test:

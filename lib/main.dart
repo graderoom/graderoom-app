@@ -1,42 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:graderoom_app/theme_model.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
+import 'package:graderoom_app/screens/login_screen.dart';
+import 'package:graderoom_app/theme.dart';
 
-import 'login_screen.dart';
+// import 'package:path/path.dart';
+// import 'package:path_provider/path_provider.dart';
+// import 'package:sembast/sembast_io.dart';
 
-void main() => runApp(ChangeNotifierProvider<ThemeModel>(
-    create: (BuildContext context) => ThemeModel(), child: MyApp()));
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Graderoom',
-      theme: Provider.of<ThemeModel>(context).currentTheme,
-      home: MyHomePage(title: 'Graderoom'),
-    );
-  }
+  // var dir = await getApplicationDocumentsDirectory();
+  // await dir.create(recursive: true);
+  // var dbPath = join(dir.path, 'offlineStore.db');
+  // await databaseFactoryIo.openDatabase(dbPath);
+
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
+  runApp(new App());
 }
 
-class MyHomePage extends StatelessWidget {
-  final String title;
-
-  MyHomePage({this.title});
-
+class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(this.title), actions: <Widget>[
-        IconButton(
-          icon: Icon(
-            Icons.login,
-          ),
-          onPressed: () => Navigator.push(
-              context, MaterialPageRoute(builder: (context) => LoginScreen())),
-        )
-      ]),
-      body: Center(),
+    return GestureDetector(
+      onTap: () {
+        FocusNode currentFocus = FocusScope.of(context);
+        if (!currentFocus.hasPrimaryFocus && currentFocus.children != null) {
+          FocusManager.instance.primaryFocus.unfocus();
+        }
+      },
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Graderoom',
+        theme: lightTheme,
+        darkTheme: darkTheme,
+        home: LoginScreen(),
+      ),
     );
   }
 }

@@ -1,0 +1,241 @@
+import 'dart:ui';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
+
+import '../constants.dart';
+import '../server_connect.dart';
+import 'forgot_password_screen.dart';
+import 'main_screen.dart';
+import 'signup_screen.dart';
+
+class LoginScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return LoginForm();
+  }
+}
+
+class LoginForm extends StatefulWidget {
+  @override
+  LoginFormState createState() {
+    return LoginFormState();
+  }
+}
+
+class LoginFormState extends State<LoginForm> {
+  final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  Alignment childAlignment = Alignment.center;
+  String loginMessage = "";
+
+  @override
+  void initState() {
+    KeyboardVisibilityNotification().addNewListener(
+      onChange: (bool visible) => setState(
+        () {
+          childAlignment = visible ? Alignment.topCenter : Alignment.center;
+        },
+      ),
+    );
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+
+    super.dispose();
+  }
+
+  void _submit() async {
+    var response = await ServerConnect().login(
+      _usernameController.text,
+      _passwordController.text,
+    );
+    if (response.statusCode == 200) {
+      _usernameController.clear();
+      _passwordController.clear();
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (BuildContext context) => MainScreen(),
+        ),
+      );
+    } else {
+      setState(() {
+        loginMessage = "Invalid Username or Password";
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _formKey.currentState?.validate();
+    return Scaffold(
+      body: AnimatedContainer(
+        curve: Curves.easeOut,
+        duration: Duration(milliseconds: 400),
+        width: double.infinity,
+        height: double.infinity,
+        alignment: childAlignment,
+        child: Form(
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          key: _formKey,
+          child: Stack(
+            children: <Widget>[
+              Container(
+                height: double.infinity,
+                width: double.infinity,
+              ),
+              Container(
+                height: double.infinity,
+                child: SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 40.0,
+                    vertical: 120.0,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Image(
+                            image: AssetImage(Constants.logoPath),
+                            height: 30.0,
+                          ),
+                          SizedBox(width: 10.0),
+                          Text(
+                            'Graderoom',
+                            style: TextStyle(
+                              fontSize: 30.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20.0),
+                      Text(
+                        '$loginMessage',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                      SizedBox(height: 30.0),
+                      _buildUsernameTF(),
+                      SizedBox(height: 30.0),
+                      _buildPasswordTF(),
+                      _buildForgotPasswordBtn(),
+                      _buildLoginBtn(),
+                      _buildSignupBtn(),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUsernameTF() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Container(
+          alignment: Alignment.centerLeft,
+          decoration: Constants.kBoxDecorationStyle,
+          height: 60.0,
+          child: TextFormField(
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              prefixIcon: Icon(Icons.person),
+              hintText: 'Enter your Username',
+              labelText: 'Username',
+            ),
+            autofillHints: <String>[AutofillHints.username],
+            controller: _usernameController,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPasswordTF() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Container(
+          alignment: Alignment.centerLeft,
+          decoration: Constants.kBoxDecorationStyle,
+          height: 60.0,
+          child: TextFormField(
+            obscureText: true,
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              prefixIcon: Icon(Icons.lock),
+              hintText: 'Enter your Password',
+              labelText: 'Password',
+            ),
+            autofillHints: <String>[AutofillHints.password],
+            controller: _passwordController,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildForgotPasswordBtn() {
+    return Container(
+      alignment: Alignment.centerRight,
+      padding: EdgeInsets.only(right: 0.0),
+      child: FlatButton(
+        onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (BuildContext context) => ForgotPasswordScreen())),
+        child: Text(
+          "Forgot Password?",
+          style: Constants.kLabelStyle,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginBtn() {
+    return Container(
+        padding: EdgeInsets.only(top: 25.0),
+        width: double.infinity,
+        child: RaisedButton(
+          elevation: 5.0,
+          onPressed: () => _submit(),
+          padding: EdgeInsets.all(15.0),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(Icons.login),
+              SizedBox(width: 5.0),
+              Text("LOGIN"),
+            ],
+          ),
+        ));
+  }
+
+  Widget _buildSignupBtn() {
+    return Container(
+      child: FlatButton(
+        onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (BuildContext context) => SignupScreen())),
+        child: Text(
+          "SIGNUP",
+          style: TextStyle(color: Theme.of(context).buttonColor),
+        ),
+      ),
+    );
+  }
+}
