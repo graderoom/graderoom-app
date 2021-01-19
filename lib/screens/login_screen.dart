@@ -195,8 +195,8 @@ class LoginFormState extends State<LoginForm> {
       alignment: Alignment.centerRight,
       padding: EdgeInsets.only(right: 0.0),
       child: FlatButton(
-        onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-            builder: (BuildContext context) => ForgotPasswordScreen())),
+        onPressed: () =>
+            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ForgotPasswordScreen())),
         child: Text(
           "Forgot Password?",
           style: Constants.kLabelStyle,
@@ -213,8 +213,7 @@ class LoginFormState extends State<LoginForm> {
           elevation: 5.0,
           onPressed: () => _submit(),
           padding: EdgeInsets.all(15.0),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
@@ -229,8 +228,8 @@ class LoginFormState extends State<LoginForm> {
   Widget _buildSignupBtn() {
     return Container(
       child: FlatButton(
-        onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-            builder: (BuildContext context) => SignupScreen())),
+        onPressed: () =>
+            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => SignupScreen())),
         child: Text(
           "SIGNUP",
           style: TextStyle(color: Theme.of(context).buttonColor),

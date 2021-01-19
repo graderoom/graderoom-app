@@ -243,8 +243,8 @@ class LoginFormState extends State<LoginForm> {
   Widget _buildLoginBtn() {
     return Container(
       child: FlatButton(
-        onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-            builder: (BuildContext context) => LoginScreen())),
+        onPressed: () =>
+            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => LoginScreen())),
         child: Text(
           "LOGIN",
           style: TextStyle(color: Theme.of(context).buttonColor),

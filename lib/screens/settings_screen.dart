@@ -9,8 +9,7 @@ class SettingsScreen extends StatelessWidget {
     _logout(context) {
       ServerConnect().logout();
 
-      Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (BuildContext context) => LoginScreen()));
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) => LoginScreen()));
     }
 
     return Scaffold(
