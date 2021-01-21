@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../constants.dart';
+import 'package:graderoom_app/constants.dart';
 import 'login_screen.dart';
 
 class SignupScreen extends StatelessWidget {

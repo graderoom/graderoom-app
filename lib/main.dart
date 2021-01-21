@@ -3,17 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:graderoom_app/screens/login_screen.dart';
 import 'package:graderoom_app/theme.dart';
 
-// import 'package:path/path.dart';
-// import 'package:path_provider/path_provider.dart';
-// import 'package:sembast/sembast_io.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // var dir = await getApplicationDocumentsDirectory();
-  // await dir.create(recursive: true);
-  // var dbPath = join(dir.path, 'offlineStore.db');
-  // await databaseFactoryIo.openDatabase(dbPath);
 
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 

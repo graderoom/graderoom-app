@@ -2,4 +2,5 @@ import 'package:flutter/material.dart';
 
 ThemeData darkTheme = ThemeData.dark();
 
-ThemeData lightTheme = ThemeData.light();
+// Todo change in-app icon dynamically
+ThemeData lightTheme = ThemeData.dark();

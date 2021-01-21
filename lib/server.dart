@@ -6,9 +6,9 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'constants.dart';
+import 'package:graderoom_app/constants.dart';
 
-class ServerConnect {
+class Server {
   static const cookiePath = '.cookies';
 
   static const loginPath = "/api/login";
@@ -21,7 +21,7 @@ class ServerConnect {
 
   static bool ready = false;
 
-  static bool updated = false;
+  static String status = "";
 
   _prepare() async {
     Directory appDocDir = await getApplicationDocumentsDirectory();
@@ -54,7 +54,15 @@ class ServerConnect {
     cookieUri = Uri.parse(url);
     cookieJar.saveFromResponse(cookieUri, [cookie]);
     var redirect = response.headers['location'][0];
-    var finalResponse = await dio.get(Constants.baseURL + redirect);
+    var finalResponse = await dio.get(
+      Constants.baseURL + redirect,
+      options: Options(
+        followRedirects: false,
+        validateStatus: (status) {
+          return status < 500;
+        },
+      ),
+    );
     return finalResponse;
   }
 
@@ -78,7 +86,10 @@ class ServerConnect {
   }
 
   Stream<Response> checkUpdateBackgroundStream() async* {
-    while (!updated) {
+    await _checkUpdateBackground();
+    while (status != "Sync Complete!" && status != "Sync Failed.") {
+      print(status);
+
       await Future.delayed(Duration(seconds: 1));
       yield await _checkUpdateBackground();
     }
@@ -99,7 +110,9 @@ class ServerConnect {
               return status < 500;
             }));
 
-    updated = response.data['message'] == "Sync Complete!";
+    print(response.data['message']);
+    status = response.data['message'];
+
     return response;
   }
 }

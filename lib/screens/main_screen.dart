@@ -1,8 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
-import '../server_connect.dart';
+import 'package:graderoom_app/database/db.dart';
+import 'package:graderoom_app/server.dart';
 import 'settings_screen.dart';
+
+var db = DB.db;
 
 class MainScreen extends StatelessWidget {
   @override
@@ -20,9 +23,12 @@ class Main extends StatefulWidget {
 
 class MainState extends State<Main> {
   void checkUpdateBackground() async {
-    await for (Response r in ServerConnect().checkUpdateBackgroundStream()) {
-      print(r.data['grades']);
+    var grades;
+    await for (Response r in Server().checkUpdateBackgroundStream()) {
+      grades = r.data['grades'];
     }
+    await db.writeCourses(grades);
+    print(await db.getCourse(index: 0));
   }
 
   @override
@@ -49,6 +55,16 @@ class MainState extends State<Main> {
           )
         ],
       ),
+      body: GridView.count(
+        crossAxisCount: 2,
+        children: _buildOverviewGrid(),
+      ),
     );
   }
+
+  List<Widget> _buildOverviewGrid() {
+    return List<Scaffold>();
+  }
+
+  Widget _buildOverviewClassButton() {}
 }

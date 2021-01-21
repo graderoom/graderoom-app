@@ -4,8 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 
-import '../constants.dart';
-import '../server_connect.dart';
+import 'package:graderoom_app/constants.dart';
+import 'package:graderoom_app/server.dart';
 import 'forgot_password_screen.dart';
 import 'main_screen.dart';
 import 'signup_screen.dart';
@@ -54,7 +54,7 @@ class LoginFormState extends State<LoginForm> {
   }
 
   void _submit() async {
-    var response = await ServerConnect().login(
+    var response = await Server().login(
       _usernameController.text,
       _passwordController.text,
     );
