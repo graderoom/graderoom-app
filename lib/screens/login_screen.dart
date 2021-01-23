@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 
 import 'package:graderoom_app/constants.dart';
-import 'package:graderoom_app/server.dart';
+import 'package:graderoom_app/http_client.dart';
 import 'forgot_password_screen.dart';
 import 'main_screen.dart';
 import 'signup_screen.dart';
@@ -26,6 +26,7 @@ class LoginForm extends StatefulWidget {
 
 class LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
+  final _node = FocusScopeNode();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -49,12 +50,13 @@ class LoginFormState extends State<LoginForm> {
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
+    _node.dispose();
 
     super.dispose();
   }
 
   void _submit() async {
-    var response = await Server().login(
+    var response = await HTTPClient().login(
       _usernameController.text,
       _passwordController.text,
     );
@@ -86,64 +88,73 @@ class LoginFormState extends State<LoginForm> {
         child: Form(
           autovalidateMode: AutovalidateMode.onUserInteraction,
           key: _formKey,
-          child: Stack(
-            children: <Widget>[
-              Container(
-                height: double.infinity,
-                width: double.infinity,
-              ),
-              Container(
-                height: double.infinity,
-                child: SingleChildScrollView(
-                  physics: AlwaysScrollableScrollPhysics(),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 40.0,
-                    vertical: 120.0,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Image(
-                            image: AssetImage(Constants.logoPath),
-                            height: 30.0,
-                          ),
-                          SizedBox(width: 10.0),
-                          Text(
-                            'Graderoom',
-                            style: TextStyle(
-                              fontSize: 30.0,
-                              fontWeight: FontWeight.bold,
+          child: FocusScope(
+            node: _node,
+            child: Stack(
+              children: <Widget>[
+                Container(
+                  height: double.infinity,
+                  width: double.infinity,
+                ),
+                Container(
+                  height: double.infinity,
+                  child: SingleChildScrollView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 40.0,
+                      vertical: 120.0,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Image(
+                              image: AssetImage(Constants.logoPath),
+                              height: 30.0,
                             ),
+                            SizedBox(width: 10.0),
+                            Text(
+                              'Graderoom',
+                              style: TextStyle(
+                                fontSize: 30.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 20.0),
+                        Text(
+                          '$loginMessage',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                        AutofillGroup(
+                          child: Column(
+                            children: <Widget>[
+                              SizedBox(height: 30.0),
+                              _buildUsernameTF(_node),
+                              SizedBox(height: 30.0),
+                              _buildPasswordTF(),
+                              _buildForgotPasswordBtn(),
+                              _buildLoginBtn(),
+                              _buildSignupBtn(),
+                            ],
                           ),
-                        ],
-                      ),
-                      SizedBox(height: 20.0),
-                      Text(
-                        '$loginMessage',
-                        style: TextStyle(color: Colors.red),
-                      ),
-                      SizedBox(height: 30.0),
-                      _buildUsernameTF(),
-                      SizedBox(height: 30.0),
-                      _buildPasswordTF(),
-                      _buildForgotPasswordBtn(),
-                      _buildLoginBtn(),
-                      _buildSignupBtn(),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildUsernameTF() {
+  Widget _buildUsernameTF(FocusScopeNode _node) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -158,6 +169,8 @@ class LoginFormState extends State<LoginForm> {
               hintText: 'Enter your Username',
               labelText: 'Username',
             ),
+            textInputAction: TextInputAction.next,
+            onEditingComplete: _node.nextFocus,
             autofillHints: <String>[AutofillHints.username],
             controller: _usernameController,
           ),
@@ -182,6 +195,8 @@ class LoginFormState extends State<LoginForm> {
               hintText: 'Enter your Password',
               labelText: 'Password',
             ),
+            textInputAction: TextInputAction.done,
+            onEditingComplete: () => _submit(),
             autofillHints: <String>[AutofillHints.password],
             controller: _passwordController,
           ),
@@ -195,8 +210,8 @@ class LoginFormState extends State<LoginForm> {
       alignment: Alignment.centerRight,
       padding: EdgeInsets.only(right: 0.0),
       child: FlatButton(
-        onPressed: () =>
-            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ForgotPasswordScreen())),
+        onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (BuildContext context) => ForgotPasswordScreen())),
         child: Text(
           "Forgot Password?",
           style: Constants.kLabelStyle,
@@ -213,7 +228,8 @@ class LoginFormState extends State<LoginForm> {
           elevation: 5.0,
           onPressed: () => _submit(),
           padding: EdgeInsets.all(15.0),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
@@ -228,8 +244,8 @@ class LoginFormState extends State<LoginForm> {
   Widget _buildSignupBtn() {
     return Container(
       child: FlatButton(
-        onPressed: () =>
-            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => SignupScreen())),
+        onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (BuildContext context) => SignupScreen())),
         child: Text(
           "SIGNUP",
           style: TextStyle(color: Theme.of(context).buttonColor),

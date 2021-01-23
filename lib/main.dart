@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:graderoom_app/http_client.dart';
 import 'package:graderoom_app/screens/login_screen.dart';
 import 'package:graderoom_app/theme.dart';
 
@@ -7,6 +8,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
+  print(HTTPClient.cookieJar);
 
   runApp(new App());
 }

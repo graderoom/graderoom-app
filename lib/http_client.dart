@@ -8,7 +8,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:graderoom_app/constants.dart';
 
-class Server {
+class HTTPClient {
   static const cookiePath = '.cookies';
 
   static const loginPath = "/api/login";

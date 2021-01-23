@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import 'package:graderoom_app/database/db.dart';
-import 'package:graderoom_app/server.dart';
+import 'package:graderoom_app/http_client.dart';
 import 'settings_screen.dart';
 
 var db = DB.db;
@@ -24,11 +24,11 @@ class Main extends StatefulWidget {
 class MainState extends State<Main> {
   void checkUpdateBackground() async {
     var grades;
-    await for (Response r in Server().checkUpdateBackgroundStream()) {
+    await for (Response r in HTTPClient().checkUpdateBackgroundStream()) {
       grades = r.data['grades'];
     }
     await db.writeCourses(grades);
-    print(await db.getCourse(index: 0));
+    setState(() {});
   }
 
   @override
@@ -55,16 +55,31 @@ class MainState extends State<Main> {
           )
         ],
       ),
-      body: GridView.count(
-        crossAxisCount: 2,
-        children: _buildOverviewGrid(),
-      ),
+      body: _buildOverviewGrid(),
     );
   }
 
-  List<Widget> _buildOverviewGrid() {
-    return List<Scaffold>();
+  Widget _buildOverviewGrid() {
+    return GridView.count(
+      crossAxisCount: 2,
+      children: _buildOverviewGridItems(),
+    );
   }
 
-  Widget _buildOverviewClassButton() {}
+  List<Center> _buildOverviewGridItems() {
+    List<Center> items = [];
+    var numItems = db.length;
+    for (var i = 0; i < numItems; i++) {
+      items.add(_buildOverviewGridItem(i));
+    }
+    return items;
+  }
+
+  Center _buildOverviewGridItem(int index) {
+    var course = db.get(index);
+    var className = course["class_name"];
+    var overallPercent = course["overall_percent"];
+    var overallLetter = course["overall_letter"];
+    return Center(child: Text("$className - $overallPercent ($overallLetter)"));
+  }
 }

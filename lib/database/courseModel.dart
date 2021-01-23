@@ -1,13 +1,14 @@
 import 'dart:convert';
-import 'assignmentModel.dart';
+
+import 'package:graderoom_app/database/assignmentModel.dart';
 
 List<Course> coursesFromJsonString(String str) {
   if (str == null) return [];
-  return List<Course>.from(json.decode(str).map((x) => Course.fromJson(x)));
+  return List<Course>.from(json.decode(str).map((x) => Course.fromJsonOrSql(x)));
 }
 
 String coursesToJsonString(List<Course> data) =>
-    json.encode(List<Course>.from(data.map((x) => x.toJson())));
+    json.encode(List<Course>.from(data.map((x) => x.toSql())));
 
 class Course {
   Course({
@@ -30,7 +31,7 @@ class Course {
   int psLocked;
   String grades;
 
-  factory Course.fromJson(Map<String, dynamic> _json) {
+  factory Course.fromJsonOrSql(Map<String, dynamic> _json) {
     if (([true, false]).contains(_json["ps_locked"])) {
       _json["ps_locked"] = _json["ps_locked"] ? 0 : 1;
     }
@@ -49,7 +50,7 @@ class Course {
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toSql() => {
         "class_name": className,
         "teacher_name": teacherName,
         "overall_percent": overallPercent,
@@ -59,4 +60,15 @@ class Course {
         "ps_locked": psLocked,
         "grades": grades,
       };
+
+  Map<String, dynamic> toJson() => {
+    "class_name": className,
+    "teacher_name": teacherName,
+    "overall_percent": overallPercent,
+    "overall_letter": overallLetter,
+    "student_id": studentId,
+    "section_id": sectionId,
+    "ps_locked": psLocked == 1 ? false : true,
+    "grades": assignmentsFromJsonString(grades),
+  };
 }
