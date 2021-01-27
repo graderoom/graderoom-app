@@ -7,8 +7,7 @@ List<Course> coursesFromJsonString(String str) {
   return List<Course>.from(json.decode(str).map((x) => Course.fromJsonOrSql(x)));
 }
 
-String coursesToJsonString(List<Course> data) =>
-    json.encode(List<Course>.from(data.map((x) => x.toSql())));
+String coursesToJsonString(List<Course> data) => json.encode(List<Course>.from(data.map((x) => x.toSql())));
 
 class Course {
   Course({
@@ -62,13 +61,13 @@ class Course {
       };
 
   Map<String, dynamic> toJson() => {
-    "class_name": className,
-    "teacher_name": teacherName,
-    "overall_percent": overallPercent,
-    "overall_letter": overallLetter,
-    "student_id": studentId,
-    "section_id": sectionId,
-    "ps_locked": psLocked == 1 ? false : true,
-    "grades": assignmentsFromJsonString(grades),
-  };
+        "class_name": className,
+        "teacher_name": teacherName,
+        "overall_percent": overallPercent,
+        "overall_letter": overallLetter,
+        "student_id": studentId,
+        "section_id": sectionId,
+        "ps_locked": psLocked == 1 ? false : true,
+        "grades": assignmentsFromJsonString(grades),
+      };
 }

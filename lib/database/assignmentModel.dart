@@ -3,8 +3,7 @@ import 'dart:convert';
 List<Assignment> assignmentsFromJsonString(String str) =>
     List<Assignment>.from(json.decode(str).map((x) => Assignment.fromJson(x)));
 
-String assignmentsToJsonString(List<Assignment> data) =>
-    json.encode(data);
+String assignmentsToJsonString(List<Assignment> data) => json.encode(data);
 
 class Assignment {
   Assignment({

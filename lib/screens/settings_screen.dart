@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:settings_ui/settings_ui.dart';
-
 import 'package:graderoom_app/http_client.dart';
-import 'login_screen.dart';
+import 'package:graderoom_app/screens/login_screen.dart';
+import 'package:settings_ui/settings_ui.dart';
 
 class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
-    _logout(context) {
-      HTTPClient().logout();
+    _logout(context) async {
+      await HTTPClient().logout();
 
       Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) => LoginScreen()));
     }

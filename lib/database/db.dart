@@ -1,11 +1,10 @@
 import 'dart:io';
 
 import 'package:graderoom_app/constants.dart';
+import 'package:graderoom_app/database/courseModel.dart';
+import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
-
-import 'courseModel.dart';
 
 class DB {
   DB._();
@@ -22,9 +21,9 @@ class DB {
   static Future<Database> get database async {
     if (_database == null) {
       _database = await _openDB();
-    } else { // If db exists but table doesn't
-      var result = await _database.query("sqlite_master",
-          where: "name = ?", whereArgs: ["Courses"]);
+    } else {
+      // If db exists but table doesn't
+      var result = await _database.query("sqlite_master", where: "name = ?", whereArgs: ["Courses"]);
       if (result.length == 0) {
         await _initDB();
       } else {
@@ -103,5 +102,4 @@ class DB {
     }
     return null;
   }
-
 }

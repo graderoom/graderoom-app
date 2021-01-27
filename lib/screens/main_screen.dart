@@ -1,9 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-
 import 'package:graderoom_app/database/db.dart';
 import 'package:graderoom_app/http_client.dart';
-import 'settings_screen.dart';
+import 'package:graderoom_app/screens/settings_screen.dart';
 
 var db = DB.db;
 

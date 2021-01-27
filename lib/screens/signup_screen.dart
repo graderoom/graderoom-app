@@ -2,9 +2,9 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import 'package:graderoom_app/constants.dart';
-import 'login_screen.dart';
+import 'package:graderoom_app/screens/login_screen.dart';
+import 'package:graderoom_app/theme.dart';
 
 class SignupScreen extends StatelessWidget {
   @override
@@ -53,10 +53,6 @@ class LoginFormState extends State<LoginForm> {
         children: <Widget>[
           Container(
             height: double.infinity,
-            width: double.infinity,
-          ),
-          Container(
-            height: double.infinity,
             child: SingleChildScrollView(
               physics: AlwaysScrollableScrollPhysics(),
               padding: EdgeInsets.symmetric(
@@ -97,6 +93,21 @@ class LoginFormState extends State<LoginForm> {
               ),
             ),
           ),
+          Container(
+            height: double.infinity,
+            width: double.infinity,
+            child: Center(
+              child: Text(
+                "NOT FUNCTIONAL",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 50.0,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -108,7 +119,7 @@ class LoginFormState extends State<LoginForm> {
       children: <Widget>[
         Container(
           alignment: Alignment.centerLeft,
-          decoration: Constants.kBoxDecorationStyle,
+          decoration: GraderoomTheme.textFieldStyle,
           height: 60.0,
           child: TextFormField(
             decoration: InputDecoration(
@@ -131,7 +142,7 @@ class LoginFormState extends State<LoginForm> {
       children: <Widget>[
         Container(
           alignment: Alignment.centerLeft,
-          decoration: Constants.kBoxDecorationStyle,
+          decoration: GraderoomTheme.textFieldStyle,
           height: 60.0,
           child: TextFormField(
             obscureText: true,
@@ -155,7 +166,7 @@ class LoginFormState extends State<LoginForm> {
       children: <Widget>[
         Container(
           alignment: Alignment.centerLeft,
-          decoration: Constants.kBoxDecorationStyle,
+          decoration: GraderoomTheme.textFieldStyle,
           height: 60.0,
           child: TextFormField(
             obscureText: true,
@@ -179,7 +190,7 @@ class LoginFormState extends State<LoginForm> {
       children: <Widget>[
         Container(
           alignment: Alignment.centerLeft,
-          decoration: Constants.kBoxDecorationStyle,
+          decoration: GraderoomTheme.textFieldStyle,
           height: 60.0,
           child: TextFormField(
             decoration: InputDecoration(
@@ -202,7 +213,7 @@ class LoginFormState extends State<LoginForm> {
       children: <Widget>[
         Container(
           alignment: Alignment.centerLeft,
-          decoration: Constants.kBoxDecorationStyle,
+          decoration: GraderoomTheme.textFieldStyle,
           height: 60.0,
           child: TextFormField(
             decoration: InputDecoration(

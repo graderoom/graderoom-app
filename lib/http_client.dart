@@ -6,42 +6,69 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'package:graderoom_app/constants.dart';
-
 class HTTPClient {
-  static const cookiePath = '.cookies';
+  static const String baseUrl = 'https://beta.graderoom.me';
 
-  static const loginPath = "/api/login";
-  static const checkUpdateBackgroundPath = "/checkUpdateBackground";
-  static const logoutPath = "/logout";
+  static const String cookiePath = ".cookies";
+  static const String loginPath = "/api/login";
+  static const String statusPath = "/api/status";
+  static const String checkUpdateBackgroundPath = "/checkUpdateBackground";
+  static const String logoutPath = "/logout";
 
-  static final dio = Dio();
-  static Uri cookieUri;
-  static PersistCookieJar cookieJar;
+  static const String loginUrl = baseUrl + loginPath;
+  static const String statusUrl = baseUrl + statusPath;
+  static const String checkUpdateBackgroundUrl = baseUrl + checkUpdateBackgroundPath;
+  static const String logoutUrl = baseUrl + logoutPath;
 
-  static bool ready = false;
+  static final Dio dio = Dio();
+  static final Uri loginUri = Uri.parse(baseUrl + loginPath);
 
-  static String status = "";
+  static PersistCookieJar _cookieJar;
 
-  _prepare() async {
+  static Future<PersistCookieJar> get cookieJar async {
+    if (_cookieJar != null) return _cookieJar;
+    await _prepare();
+    return _cookieJar;
+  }
+
+  static Future<Cookie> get cookie async {
+    var cookies = (await cookieJar).loadForRequest(loginUri);
+    if (cookies.length != 0) {
+      return (await cookieJar).loadForRequest(loginUri)[0];
+    }
+    return null;
+  }
+
+  static _prepare() async {
     Directory appDocDir = await getApplicationDocumentsDirectory();
     String appDocPath = appDocDir.path;
-    cookieJar = PersistCookieJar(dir: join(appDocPath, cookiePath));
-    dio.interceptors.add(CookieManager(cookieJar));
-    ready = true;
+    _cookieJar = PersistCookieJar(dir: join(appDocPath, cookiePath));
+    dio.interceptors.add(CookieManager(_cookieJar));
+  }
+
+  Future<Response> getStatus() async {
+    return await dio.get(
+      statusUrl,
+      options: Options(
+        followRedirects: true,
+        headers: {
+          'referer': baseUrl,
+        },
+        validateStatus: (status) {
+          return status < 500;
+        },
+      ),
+    );
   }
 
   Future<Response> login(String username, String password) async {
-    if (!ready) await _prepare();
-
-    var url = Constants.baseURL + loginPath;
     var body = {
       'username': username,
       'password': password,
     };
 
     var response = await dio.post(
-      url,
+      loginUrl,
       data: body,
       options: Options(
         followRedirects: false,
@@ -50,68 +77,56 @@ class HTTPClient {
         },
       ),
     );
-    var cookie = Cookie.fromSetCookieValue(response.headers['set-cookie'][0]);
-    cookieUri = Uri.parse(url);
-    cookieJar.saveFromResponse(cookieUri, [cookie]);
-    var redirect = response.headers['location'][0];
-    var finalResponse = await dio.get(
-      Constants.baseURL + redirect,
-      options: Options(
-        followRedirects: false,
-        validateStatus: (status) {
-          return status < 500;
-        },
-      ),
-    );
-    return finalResponse;
+
+    if (response.statusCode == 200) {
+      var _cookie = Cookie.fromSetCookieValue(response.headers['set-cookie'][0]);
+      (await cookieJar).saveFromResponse(loginUri, [_cookie]);
+    }
+    return response;
   }
 
-  Future<Response> logout() async {
-    var url = Constants.baseURL + logoutPath;
-    var cookie = cookieJar.loadForRequest(cookieUri);
-    var response = await dio.get(
-      url,
+  Future logout() async {
+    await dio.get(
+      logoutUrl,
       options: Options(
         followRedirects: false,
         headers: {
           'cookie': cookie,
-          'referer': Constants.baseURL,
+          'referer': baseUrl,
         },
         validateStatus: (status) {
           return status < 500;
         },
       ),
     );
-    return response;
   }
 
   Stream<Response> checkUpdateBackgroundStream() async* {
+    var status = "";
+    if ((await getStatus()).statusCode == 401) yield null;
     await _checkUpdateBackground();
-    while (status != "Sync Complete!" && status != "Sync Failed.") {
-      print(status);
-
+    while (!(["Sync Complete!", "Sync Failed.", "Already Synced!"]).contains(status)) {
       await Future.delayed(Duration(seconds: 1));
-      yield await _checkUpdateBackground();
+      var response = await _checkUpdateBackground();
+      status = response.data['message'];
+      yield response;
     }
   }
 
   Future<Response> _checkUpdateBackground() async {
-    var url = Constants.baseURL + checkUpdateBackgroundPath;
-    var cookie = cookieJar.loadForRequest(cookieUri);
-
-    var response = await dio.get(url,
-        options: Options(
-            followRedirects: false,
-            headers: {
-              'cookie': cookie,
-              'referer': Constants.baseURL,
-            },
-            validateStatus: (status) {
-              return status < 500;
-            }));
-
-    print(response.data['message']);
-    status = response.data['message'];
+    var response = await dio.get(
+      checkUpdateBackgroundUrl,
+      options: Options(
+        followRedirects: false,
+        headers: {
+          'cookie': cookie,
+          'referer': baseUrl,
+        },
+        validateStatus: (status) {
+          return status < 500;
+        },
+      ),
+    );
 
     return response;
   }

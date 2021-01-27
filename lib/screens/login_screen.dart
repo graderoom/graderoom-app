@@ -2,13 +2,13 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:keyboard_visibility/keyboard_visibility.dart';
-
 import 'package:graderoom_app/constants.dart';
 import 'package:graderoom_app/http_client.dart';
-import 'forgot_password_screen.dart';
-import 'main_screen.dart';
-import 'signup_screen.dart';
+import 'package:graderoom_app/screens/forgot_password_screen.dart';
+import 'package:graderoom_app/screens/main_screen.dart';
+import 'package:graderoom_app/screens/signup_screen.dart';
+import 'package:graderoom_app/theme.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 
 class LoginScreen extends StatelessWidget {
   @override
@@ -94,10 +94,6 @@ class LoginFormState extends State<LoginForm> {
               children: <Widget>[
                 Container(
                   height: double.infinity,
-                  width: double.infinity,
-                ),
-                Container(
-                  height: double.infinity,
                   child: SingleChildScrollView(
                     physics: AlwaysScrollableScrollPhysics(),
                     padding: EdgeInsets.symmetric(
@@ -107,22 +103,26 @@ class LoginFormState extends State<LoginForm> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Image(
-                              image: AssetImage(Constants.logoPath),
-                              height: 30.0,
-                            ),
-                            SizedBox(width: 10.0),
-                            Text(
-                              'Graderoom',
-                              style: TextStyle(
-                                fontSize: 30.0,
-                                fontWeight: FontWeight.bold,
+                        Container(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Image(
+                                image: AssetImage(Constants.logoPath),
+                                height: 30.0,
                               ),
-                            ),
-                          ],
+                              SizedBox(width: 10.0),
+                              Text(
+                                'Graderoom',
+                                style: TextStyle(
+                                  fontSize: 30.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          decoration: GraderoomTheme.brandStyle,
+                          padding: EdgeInsets.all(20.0),
                         ),
                         SizedBox(height: 20.0),
                         Text(
@@ -160,7 +160,7 @@ class LoginFormState extends State<LoginForm> {
       children: <Widget>[
         Container(
           alignment: Alignment.centerLeft,
-          decoration: Constants.kBoxDecorationStyle,
+          decoration: GraderoomTheme.textFieldStyle,
           height: 60.0,
           child: TextFormField(
             decoration: InputDecoration(
@@ -185,7 +185,7 @@ class LoginFormState extends State<LoginForm> {
       children: <Widget>[
         Container(
           alignment: Alignment.centerLeft,
-          decoration: Constants.kBoxDecorationStyle,
+          decoration: GraderoomTheme.textFieldStyle,
           height: 60.0,
           child: TextFormField(
             obscureText: true,
@@ -210,11 +210,11 @@ class LoginFormState extends State<LoginForm> {
       alignment: Alignment.centerRight,
       padding: EdgeInsets.only(right: 0.0),
       child: FlatButton(
-        onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-            builder: (BuildContext context) => ForgotPasswordScreen())),
+        onPressed: () =>
+            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ForgotPasswordScreen())),
         child: Text(
           "Forgot Password?",
-          style: Constants.kLabelStyle,
+          style: GraderoomTheme.labelStyle,
         ),
       ),
     );
@@ -228,8 +228,7 @@ class LoginFormState extends State<LoginForm> {
           elevation: 5.0,
           onPressed: () => _submit(),
           padding: EdgeInsets.all(15.0),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
@@ -244,8 +243,8 @@ class LoginFormState extends State<LoginForm> {
   Widget _buildSignupBtn() {
     return Container(
       child: FlatButton(
-        onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-            builder: (BuildContext context) => SignupScreen())),
+        onPressed: () =>
+            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => SignupScreen())),
         child: Text(
           "SIGNUP",
           style: TextStyle(color: Theme.of(context).buttonColor),

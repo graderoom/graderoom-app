@@ -2,14 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:graderoom_app/http_client.dart';
 import 'package:graderoom_app/screens/login_screen.dart';
+import 'package:graderoom_app/screens/main_screen.dart';
 import 'package:graderoom_app/theme.dart';
+
+var home;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-  print(HTTPClient.cookieJar);
+  var cookie = await HTTPClient.cookie;
+  if (cookie != null) {
+    var now = DateTime.now();
+    if (now.isBefore(cookie.expires)) {
+      var loggedIn = await HTTPClient().getStatus();
+      if (loggedIn.statusCode == 200) {
+        home = MainScreen();
+      } else {
+        home = LoginScreen();
+      }
+    }
+  } else {
+    home = LoginScreen();
+  }
 
   runApp(new App());
 }
@@ -27,9 +43,9 @@ class App extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Graderoom',
-        theme: lightTheme,
-        darkTheme: darkTheme,
-        home: LoginScreen(),
+        theme: GraderoomTheme.lightTheme,
+        darkTheme: GraderoomTheme.darkTheme,
+        home: home,
       ),
     );
   }
