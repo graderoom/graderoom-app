@@ -8,7 +8,7 @@ import 'package:graderoom_app/screens/forgot_password_screen.dart';
 import 'package:graderoom_app/screens/main_screen.dart';
 import 'package:graderoom_app/screens/signup_screen.dart';
 import 'package:graderoom_app/theme.dart';
-import 'package:keyboard_visibility/keyboard_visibility.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
 class LoginScreen extends StatelessWidget {
   @override
