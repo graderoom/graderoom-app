@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:graderoom_app/database/db.dart';
 import 'package:graderoom_app/http_client.dart';
 import 'package:graderoom_app/screens/settings_screen.dart';
@@ -59,26 +60,57 @@ class MainState extends State<Main> {
   }
 
   Widget _buildOverviewGrid() {
-    return GridView.count(
+    return StaggeredGridView.countBuilder(
       crossAxisCount: 2,
-      children: _buildOverviewGridItems(),
+      itemCount: db.length,
+      itemBuilder: (BuildContext context, int index) => Container(
+        child: _buildOverviewGridCard(index),
+      ),
+      staggeredTileBuilder: (int index) => StaggeredTile.fit(1),
     );
   }
 
-  List<Center> _buildOverviewGridItems() {
-    List<Center> items = [];
-    var numItems = db.length;
-    for (var i = 0; i < numItems; i++) {
-      items.add(_buildOverviewGridItem(i));
-    }
-    return items;
-  }
-
-  Center _buildOverviewGridItem(int index) {
+  Card _buildOverviewGridCard(int index) {
     var course = db.get(index);
     var className = course["class_name"];
     var overallPercent = course["overall_percent"];
     var overallLetter = course["overall_letter"];
-    return Center(child: Text("$className - $overallPercent ($overallLetter)"));
+    return Card(
+      margin: EdgeInsets.all(5.0),
+      semanticContainer: true,
+      color: Theme.of(context).primaryColor,
+      elevation: 10.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
+      ),
+      child: ListTile(
+        contentPadding: EdgeInsets.all(10.0),
+        title: Column(
+          children: <Widget>[
+            Text(
+              "$className",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            Spacer(),
+            Text(
+              "$overallLetter",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 80.0,
+              ),
+            ),
+            Text(
+              "$overallPercent%",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

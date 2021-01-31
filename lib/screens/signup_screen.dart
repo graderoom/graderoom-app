@@ -87,6 +87,8 @@ class LoginFormState extends State<LoginForm> {
                   _buildConfirmPasswordTF(),
                   SizedBox(height: 30.0),
                   _buildSchoolEmailTF(),
+                  SizedBox(height: 30.0),
+                  _buildBetaKeyTF(),
                   _buildSignupBtn(),
                   _buildLoginBtn(),
                 ],

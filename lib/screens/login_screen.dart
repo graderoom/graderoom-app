@@ -2,18 +2,20 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:graderoom_app/constants.dart';
 import 'package:graderoom_app/http_client.dart';
 import 'package:graderoom_app/screens/forgot_password_screen.dart';
 import 'package:graderoom_app/screens/main_screen.dart';
 import 'package:graderoom_app/screens/signup_screen.dart';
 import 'package:graderoom_app/theme.dart';
-import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
 class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return LoginForm();
+    return KeyboardDismissOnTap(
+      child: LoginForm(),
+    );
   }
 }
 
@@ -32,19 +34,6 @@ class LoginFormState extends State<LoginForm> {
 
   Alignment childAlignment = Alignment.center;
   String loginMessage = "";
-
-  @override
-  void initState() {
-    KeyboardVisibilityNotification().addNewListener(
-      onChange: (bool visible) => setState(
-        () {
-          childAlignment = visible ? Alignment.topCenter : Alignment.center;
-        },
-      ),
-    );
-
-    super.initState();
-  }
 
   @override
   void dispose() {

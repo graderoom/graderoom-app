@@ -7,7 +7,7 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 class HTTPClient {
-  static const String baseUrl = 'https://beta.graderoom.me';
+  static const String baseUrl = 'http://192.168.1.25:5998';
 
   static const String cookiePath = ".cookies";
   static const String loginPath = "/api/login";
