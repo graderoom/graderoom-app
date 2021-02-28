@@ -2,9 +2,9 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:graderoom_app/constants.dart';
-import 'package:graderoom_app/screens/login_screen.dart';
-import 'package:graderoom_app/theme.dart';
+import 'package:graderoom_app/theme/themeNotifier.dart';
+import 'package:graderoom_app/screens/loginScreen.dart';
+import 'package:provider/provider.dart';
 
 class SignupScreen extends StatelessWidget {
   @override
@@ -22,7 +22,15 @@ class LoginForm extends StatefulWidget {
   }
 }
 
-class LoginFormState extends State<LoginForm> {
+class LoginFormState extends State<LoginForm>  with WidgetsBindingObserver {
+  ThemeNotifier _themeNotifier;
+
+  @override
+  void didChangePlatformBrightness() {
+    _themeNotifier.init();
+    super.didChangePlatformBrightness();
+  }
+
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -45,6 +53,7 @@ class LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
+    _themeNotifier = Provider.of<ThemeNotifier>(context);
     _formKey.currentState?.validate();
     return Form(
       autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -66,7 +75,7 @@ class LoginFormState extends State<LoginForm> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Image(
-                        image: AssetImage(Constants.logoPath),
+                        image: AssetImage(_themeNotifier.logoPath),
                         height: 30.0,
                       ),
                       SizedBox(width: 10.0),
@@ -103,7 +112,7 @@ class LoginFormState extends State<LoginForm> {
                 "NOT FUNCTIONAL",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.red,
+                  color: Theme.of(context).errorColor,
                   fontWeight: FontWeight.bold,
                   fontSize: 50.0,
                 ),
@@ -121,10 +130,10 @@ class LoginFormState extends State<LoginForm> {
       children: <Widget>[
         Container(
           alignment: Alignment.centerLeft,
-          decoration: GraderoomTheme.textFieldStyle,
+          decoration: _themeNotifier.textFieldBoxDecoration,
           height: 60.0,
           child: TextFormField(
-            decoration: InputDecoration(
+            decoration: _themeNotifier.textFieldInputDecoration.copyWith(
               border: InputBorder.none,
               prefixIcon: Icon(Icons.person),
               hintText: 'Enter a Username',
@@ -144,11 +153,11 @@ class LoginFormState extends State<LoginForm> {
       children: <Widget>[
         Container(
           alignment: Alignment.centerLeft,
-          decoration: GraderoomTheme.textFieldStyle,
+          decoration: _themeNotifier.textFieldBoxDecoration,
           height: 60.0,
           child: TextFormField(
             obscureText: true,
-            decoration: InputDecoration(
+            decoration: _themeNotifier.textFieldInputDecoration.copyWith(
               border: InputBorder.none,
               prefixIcon: Icon(Icons.lock),
               hintText: 'Enter a Password',
@@ -168,11 +177,11 @@ class LoginFormState extends State<LoginForm> {
       children: <Widget>[
         Container(
           alignment: Alignment.centerLeft,
-          decoration: GraderoomTheme.textFieldStyle,
+          decoration: _themeNotifier.textFieldBoxDecoration,
           height: 60.0,
           child: TextFormField(
             obscureText: true,
-            decoration: InputDecoration(
+            decoration: _themeNotifier.textFieldInputDecoration.copyWith(
               border: InputBorder.none,
               prefixIcon: Icon(Icons.lock),
               hintText: 'Confirm your Password',
@@ -192,10 +201,10 @@ class LoginFormState extends State<LoginForm> {
       children: <Widget>[
         Container(
           alignment: Alignment.centerLeft,
-          decoration: GraderoomTheme.textFieldStyle,
+          decoration: _themeNotifier.textFieldBoxDecoration,
           height: 60.0,
           child: TextFormField(
-            decoration: InputDecoration(
+            decoration: _themeNotifier.textFieldInputDecoration.copyWith(
               border: InputBorder.none,
               prefixIcon: Icon(Icons.mail_outline_rounded),
               hintText: 'Enter your school email',
@@ -215,10 +224,10 @@ class LoginFormState extends State<LoginForm> {
       children: <Widget>[
         Container(
           alignment: Alignment.centerLeft,
-          decoration: GraderoomTheme.textFieldStyle,
+          decoration: _themeNotifier.textFieldBoxDecoration,
           height: 60.0,
           child: TextFormField(
-            decoration: InputDecoration(
+            decoration: _themeNotifier.textFieldInputDecoration.copyWith(
               border: InputBorder.none,
               prefixIcon: Icon(Icons.vpn_key),
               hintText: 'Enter your beta key',
@@ -235,13 +244,8 @@ class LoginFormState extends State<LoginForm> {
     return Container(
         padding: EdgeInsets.only(top: 25.0),
         width: double.infinity,
-        child: RaisedButton(
-          elevation: 5.0,
+        child: ElevatedButton(
           onPressed: () => _submit(),
-          padding: EdgeInsets.all(15.0),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30.0),
-          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
@@ -255,7 +259,7 @@ class LoginFormState extends State<LoginForm> {
 
   Widget _buildLoginBtn() {
     return Container(
-      child: FlatButton(
+      child: TextButton(
         onPressed: () =>
             Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => LoginScreen())),
         child: Text(

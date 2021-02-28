@@ -1,9 +1,13 @@
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:graderoom_app/http_client.dart';
-import 'package:graderoom_app/screens/login_screen.dart';
-import 'package:graderoom_app/screens/main_screen.dart';
-import 'package:graderoom_app/theme.dart';
+import 'package:graderoom_app/theme/themeNotifier.dart';
+import 'package:graderoom_app/httpClient.dart';
+import 'package:graderoom_app/screens/loginScreen.dart';
+import 'package:graderoom_app/screens/mainScreen.dart';
+import 'package:provider/provider.dart';
+
+import 'database/db.dart';
 
 var home;
 
@@ -12,12 +16,17 @@ void main() async {
 
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
+  await DB.database;
+
   var cookie = await HTTPClient.cookie;
   if (cookie != null) {
     var now = DateTime.now();
     if (now.isBefore(cookie.expires)) {
-      var loggedIn = await HTTPClient().getStatus();
-      if (loggedIn.statusCode == 200) {
+      var loggedIn = await HTTPClient().getStatus(
+        showToast: false,
+        showLoading: false,
+      );
+      if (loggedIn?.statusCode == 200) {
         home = MainScreen();
       } else {
         home = LoginScreen();
@@ -27,12 +36,20 @@ void main() async {
     home = LoginScreen();
   }
 
-  runApp(new App());
+  runApp(
+    ChangeNotifierProvider<ThemeNotifier>(
+      create: (BuildContext context) {
+        return ThemeNotifier.fromString(DB.getLocal("theme"));
+      },
+      child: new App(),
+    ),
+  );
 }
 
-class App extends StatelessWidget {
+class App extends StatelessWidget with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
+    final themeNotifier = Provider.of<ThemeNotifier>(context);
     return GestureDetector(
       onTap: () {
         FocusNode currentFocus = FocusScope.of(context);
@@ -41,10 +58,13 @@ class App extends StatelessWidget {
         }
       },
       child: MaterialApp(
+        builder: BotToastInit(),
         debugShowCheckedModeBanner: false,
         title: 'Graderoom',
-        theme: GraderoomTheme.lightTheme,
-        darkTheme: GraderoomTheme.darkTheme,
+        theme: themeNotifier.lightTheme,
+        darkTheme: themeNotifier.darkTheme,
+        themeMode: themeNotifier.themeMode,
+        navigatorObservers: [BotToastNavigatorObserver()],
         home: home,
       ),
     );

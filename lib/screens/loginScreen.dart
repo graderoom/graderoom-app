@@ -3,12 +3,12 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:graderoom_app/constants.dart';
-import 'package:graderoom_app/http_client.dart';
-import 'package:graderoom_app/screens/forgot_password_screen.dart';
-import 'package:graderoom_app/screens/main_screen.dart';
-import 'package:graderoom_app/screens/signup_screen.dart';
-import 'package:graderoom_app/theme.dart';
+import 'package:graderoom_app/httpClient.dart';
+import 'package:graderoom_app/screens/forgotPasswordScreen.dart';
+import 'package:graderoom_app/screens/mainScreen.dart';
+import 'package:graderoom_app/screens/signupScreen.dart';
+import 'package:graderoom_app/theme/themeNotifier.dart';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatelessWidget {
   @override
@@ -26,7 +26,9 @@ class LoginForm extends StatefulWidget {
   }
 }
 
-class LoginFormState extends State<LoginForm> {
+class LoginFormState extends State<LoginForm> with WidgetsBindingObserver {
+  ThemeNotifier _themeNotifier;
+
   final _formKey = GlobalKey<FormState>();
   final _node = FocusScopeNode();
   final _usernameController = TextEditingController();
@@ -36,12 +38,36 @@ class LoginFormState extends State<LoginForm> {
   String loginMessage = "";
 
   @override
+  void initState() {
+    _initState();
+    WidgetsBinding.instance.addObserver(this);
+    super.initState();
+  }
+
+  @override
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
     _node.dispose();
-
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    _themeNotifier.init();
+    super.didChangePlatformBrightness();
+  }
+
+  void _initState() async {
+    var status = await HTTPClient().getStatus();
+    if (status?.statusCode == 200) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (BuildContext context) => MainScreen(),
+        ),
+      );
+    }
   }
 
   void _submit() async {
@@ -49,6 +75,7 @@ class LoginFormState extends State<LoginForm> {
       _usernameController.text,
       _passwordController.text,
     );
+    if (response == null) return;
     if (response.statusCode == 200) {
       _usernameController.clear();
       _passwordController.clear();
@@ -66,6 +93,7 @@ class LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
+    _themeNotifier = Provider.of<ThemeNotifier>(context);
     _formKey.currentState?.validate();
     return Scaffold(
       body: AnimatedContainer(
@@ -97,7 +125,7 @@ class LoginFormState extends State<LoginForm> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
                               Image(
-                                image: AssetImage(Constants.logoPath),
+                                image: AssetImage(_themeNotifier.logoPath),
                                 height: 30.0,
                               ),
                               SizedBox(width: 10.0),
@@ -110,13 +138,15 @@ class LoginFormState extends State<LoginForm> {
                               ),
                             ],
                           ),
-                          decoration: GraderoomTheme.brandStyle,
+                          decoration: _themeNotifier.brandBoxDecoration,
                           padding: EdgeInsets.all(20.0),
                         ),
                         SizedBox(height: 20.0),
                         Text(
                           '$loginMessage',
-                          style: TextStyle(color: Colors.red),
+                          style: TextStyle(
+                            color: Theme.of(context).errorColor,
+                          ),
                         ),
                         AutofillGroup(
                           child: Column(
@@ -149,7 +179,7 @@ class LoginFormState extends State<LoginForm> {
       children: <Widget>[
         Container(
           alignment: Alignment.centerLeft,
-          decoration: GraderoomTheme.textFieldStyle,
+          decoration: _themeNotifier.textFieldBoxDecoration,
           height: 60.0,
           child: TextFormField(
             decoration: InputDecoration(
@@ -174,7 +204,7 @@ class LoginFormState extends State<LoginForm> {
       children: <Widget>[
         Container(
           alignment: Alignment.centerLeft,
-          decoration: GraderoomTheme.textFieldStyle,
+          decoration: _themeNotifier.textFieldBoxDecoration,
           height: 60.0,
           child: TextFormField(
             obscureText: true,
@@ -198,12 +228,12 @@ class LoginFormState extends State<LoginForm> {
     return Container(
       alignment: Alignment.centerRight,
       padding: EdgeInsets.only(right: 0.0),
-      child: FlatButton(
+      child: TextButton(
         onPressed: () =>
             Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ForgotPasswordScreen())),
         child: Text(
           "Forgot Password?",
-          style: GraderoomTheme.labelStyle,
+          style: _themeNotifier.labelTextStyle,
         ),
       ),
     );
@@ -213,11 +243,8 @@ class LoginFormState extends State<LoginForm> {
     return Container(
         padding: EdgeInsets.only(top: 25.0),
         width: double.infinity,
-        child: RaisedButton(
-          elevation: 5.0,
+        child: ElevatedButton(
           onPressed: () => _submit(),
-          padding: EdgeInsets.all(15.0),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
@@ -231,7 +258,7 @@ class LoginFormState extends State<LoginForm> {
 
   Widget _buildSignupBtn() {
     return Container(
-      child: FlatButton(
+      child: TextButton(
         onPressed: () =>
             Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => SignupScreen())),
         child: Text(

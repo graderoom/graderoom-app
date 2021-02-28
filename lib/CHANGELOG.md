@@ -40,9 +40,22 @@
 <!-- ------------------------------------------------------------------------------------------- -->
 <!-- ------------------------------------------------------------------------------------------- -->
 
-## [Beta M-0.0.5] - 2020-01-31
+## [Beta M-0.1.0] - 2020-02-21
+### Added
+- Debug toasts can be enabled in settings
+- Logo and icon buttons now respond to theme changes
+- A non-functional menu button
+- Loading animation while sending requests to the server
+- Pulling down on main screen checks login status and refreshes settings
+
 ### Improved
-- Main page now contains widgets for each class
+- Main page now contains colored cards for each course
+- Changing theme is now supported
+- Back button from the main screen no longer causes unintended app behavior
+- Pre-load screen on android now displays logo and is dark themed
+
+### Removed
+- Gradient around logo
 
 ## [Beta M-0.0.4] - 2020-01-27
 ### Added
