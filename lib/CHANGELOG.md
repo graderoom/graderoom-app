@@ -52,7 +52,7 @@
 - Main page now contains colored cards for each course
 - Changing theme is now supported
 - Back button from the main screen no longer causes unintended app behavior
-- Pre-load screen on android now displays logo and is dark themed
+- Pre-load screen now displays logo and is dark themed
 
 ### Removed
 - Gradient around logo
