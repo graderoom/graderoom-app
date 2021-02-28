@@ -17,7 +17,7 @@ enum Method {
 
 class HTTPClient {
   static const String cookiePath = ".cookies";
-  static const String baseUrl = 'http://192.168.1.23:5998';
+  static const String baseUrl = 'https://beta.graderoom.me';
   static const String loginPath = "/api/login";
   static const String statusPath = "/api/status";
   static const String checkUpdateBackgroundPath = "/checkUpdateBackground";
