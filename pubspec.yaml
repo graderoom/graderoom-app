@@ -1,7 +1,7 @@
 name: graderoom_app
 description: An advanced grade visualizer for students.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-version: 0.0.5+6
+version: 0.1.0+6
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
