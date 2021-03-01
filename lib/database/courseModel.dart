@@ -1,13 +1,9 @@
 import 'dart:convert';
 
-import 'package:graderoom_app/database/assignmentModel.dart';
-
 List<Courses> coursesFromJsonString(String str) {
   if (str == null) return [];
-  return List<Courses>.from(json.decode(str).map((x) => Courses.fromJsonOrSql(x)));
+  return List<Courses>.from(json.decode(str).map((x) => Courses.fromMapOrResponse(x)));
 }
-
-String coursesToJsonString(List<Courses> data) => json.encode(List<Courses>.from(data.map((x) => x.toSql())));
 
 class Courses {
   Courses({
@@ -21,18 +17,16 @@ class Courses {
     this.grades,
   });
 
-  static final Map<String, String> sqlColumns = {
-    "class_name": "TEXT",
-    "teacher_name": "TEXT",
-    "overall_percent": "",
-    "overall_letter": "",
-    "student_id": "TEXT",
-    "section_id": "TEXT",
-    "ps_locked": "TEXT",
-    "grades": "TEXT",
-  };
-
-  static String get sqlModel => sqlColumns.entries.map((e) => e.key + " " + e.value).join(", ");
+  static final List<String> keys = [
+    "class_name",
+    "teacher_name",
+    "overall_percent",
+    "overall_letter",
+    "student_id",
+    "section_id",
+    "ps_locked",
+    "grades",
+  ];
 
   String className;
   String teacherName;
@@ -40,29 +34,26 @@ class Courses {
   dynamic overallLetter;
   String studentId;
   String sectionId;
-  int psLocked;
-  String grades;
+  bool psLocked;
+  List<dynamic> grades;
 
-  factory Courses.fromJsonOrSql(Map<String, dynamic> _json) {
-    if (([true, false]).contains(_json["ps_locked"])) {
-      _json["ps_locked"] = _json["ps_locked"] ? 1 : 0;
-    }
-    if (!(_json["grades"] is String)) {
-      _json["grades"] = json.encode(_json["grades"]);
+  factory Courses.fromMapOrResponse(Map<String, dynamic> _json) {
+    if (_json["grades"] is String) {
+      _json["grades"] = json.encode(_json["grades"]) as List<dynamic>;
     }
     return Courses(
-      className: _json["class_name"],
-      teacherName: _json["teacher_name"],
-      overallPercent: _json["overall_percent"],
-      overallLetter: _json["overall_letter"],
-      studentId: _json["student_id"],
-      sectionId: _json["section_id"],
-      psLocked: _json["ps_locked"],
-      grades: _json["grades"],
+      className: _json["class_name"] as String,
+      teacherName: _json["teacher_name"] as String,
+      overallPercent: _json["overall_percent"] as dynamic,
+      overallLetter: _json["overall_letter"] as dynamic,
+      studentId: _json["student_id"] as String,
+      sectionId: _json["section_id"] as String,
+      psLocked: _json["ps_locked"] as bool,
+      grades: _json["grades"] as List<dynamic>,
     );
   }
 
-  Map<String, dynamic> toSql() => {
+  Map<String, dynamic> toMap() => {
         "class_name": className,
         "teacher_name": teacherName,
         "overall_percent": overallPercent,
@@ -71,16 +62,5 @@ class Courses {
         "section_id": sectionId,
         "ps_locked": psLocked,
         "grades": grades,
-      };
-
-  Map<String, dynamic> toJson() => {
-        "class_name": className,
-        "teacher_name": teacherName,
-        "overall_percent": overallPercent,
-        "overall_letter": overallLetter,
-        "student_id": studentId,
-        "section_id": sectionId,
-        "ps_locked": psLocked == 1,
-        "grades": assignmentsFromJsonString(grades),
       };
 }

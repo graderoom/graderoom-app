@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -60,7 +61,7 @@ class LoginFormState extends State<LoginForm> with WidgetsBindingObserver {
   }
 
   void _initState() async {
-    var status = await HTTPClient().getStatus();
+    Response<dynamic> status = await HTTPClient().getStatus();
     if (status?.statusCode == 200) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
@@ -71,7 +72,7 @@ class LoginFormState extends State<LoginForm> with WidgetsBindingObserver {
   }
 
   void _submit() async {
-    var response = await HTTPClient().login(
+    Response<dynamic> response = await HTTPClient().login(
       _usernameController.text,
       _passwordController.text,
     );

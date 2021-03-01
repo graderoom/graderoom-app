@@ -2,15 +2,12 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:graderoom_app/database/db.dart';
-import 'package:graderoom_app/database/settingsModel.dart';
 import 'package:graderoom_app/httpClient.dart';
 import 'package:graderoom_app/screens/loginScreen.dart';
 import 'package:graderoom_app/screens/settingsScreen.dart';
 import 'package:graderoom_app/theme/themeNotifier.dart';
 import 'package:graderoom_app/toaster.dart';
 import 'package:provider/provider.dart';
-
-var settings = {};
 
 class MainScreen extends StatelessWidget {
   @override
@@ -29,8 +26,39 @@ class Main extends StatefulWidget {
 class MainState extends State<Main> with WidgetsBindingObserver {
   ThemeNotifier _themeNotifier;
 
+  Future<void> _setupGeneral() async {
+    var generalResponse = await HTTPClient().getGeneral();
+    var courses = generalResponse.gradeData;
+    await DB.writeCourses(courses);
+    setState(() {});
+  }
+
+  Future<void> _checkUpdateBackground() async {
+    var settingsResponse = await HTTPClient().getSettings();
+    await DB.writeSettings(settingsResponse);
+    var grades;
+    await for (Response r in HTTPClient().checkUpdateBackgroundStream()) {
+      grades = r.data['grades'];
+    }
+    await DB.writeCoursesFromString(grades);
+    setState(() {});
+  }
+
+  Future<void> _checkStatus() async {
+    var response = await HTTPClient().getStatus();
+    if (response == null || response.statusCode == 401) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+      );
+    } else {
+      _checkUpdateBackground();
+      _setupGeneral();
+    }
+  }
+
   @override
   void initState() {
+    _setupGeneral();
     _checkUpdateBackground();
     DB.database;
     WidgetsBinding.instance.addObserver(this);
@@ -166,28 +194,5 @@ class MainState extends State<Main> with WidgetsBindingObserver {
         ),
       ),
     );
-  }
-
-  void _checkUpdateBackground() async {
-    var grades;
-    var settingsResponse = await HTTPClient().getSettings();
-    var settings = Settings.fromJsonOrSql(settingsResponse);
-    await DB.writeSettings(settings);
-    await for (Response r in HTTPClient().checkUpdateBackgroundStream()) {
-      grades = r.data['grades'];
-    }
-    await DB.writeCourses(grades);
-    setState(() {});
-  }
-
-  Future<void> _checkStatus() async {
-    var response = await HTTPClient().getStatus();
-    if (response == null || response.statusCode == 401) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => LoginScreen()),
-      );
-    } else {
-      _checkUpdateBackground();
-    }
   }
 }

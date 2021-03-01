@@ -4,19 +4,20 @@ class Local {
     this.showDebugToasts,
   });
 
-  static final Map<String, String> sqlColumns = {
-    "theme": "TEXT",
-    "showDebugToasts": "INTEGER",
-  };
-
-  static String get sqlModel => sqlColumns.entries.map((e) => e.key + " " + e.value).join(", ");
+  static final List<String> keys = [
+    "theme",
+    "showDebugToasts",
+  ];
 
   String theme;
-  int showDebugToasts;
+  bool showDebugToasts;
 
-  factory Local.fromJsonOrSql(Map<String, dynamic> _json) {
-    if (([true, false]).contains(_json["showDebugToasts"])) {
-      _json["showDebugToasts"] = _json["showDebugToasts"] ? 1 : 0;
+  factory Local.fromMap(Map<String, dynamic> _json) {
+    if (_json == null) {
+      return Local(
+        theme: null,
+        showDebugToasts: null,
+      );
     }
     return Local(
       theme: _json["theme"],
@@ -24,13 +25,8 @@ class Local {
     );
   }
 
-  Map<String, dynamic> toSql() => {
+  Map<String, dynamic> toMap() => {
     "theme": theme,
     "showDebugToasts": showDebugToasts,
-  };
-
-  Map<String, dynamic> toJson() => {
-    "theme": theme,
-    "showDebugToasts": showDebugToasts == 1,
   };
 }

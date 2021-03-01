@@ -1,10 +1,3 @@
-import 'dart:convert';
-
-List<Assignment> assignmentsFromJsonString(String str) =>
-    List<Assignment>.from(json.decode(str).map((x) => Assignment.fromJson(x)));
-
-String assignmentsToJsonString(List<Assignment> data) => json.encode(data);
-
 class Assignment {
   Assignment({
     this.date,
@@ -26,7 +19,7 @@ class Assignment {
   dynamic gradePercent;
   int psaid;
 
-  factory Assignment.fromJson(Map<String, dynamic> json) => Assignment(
+  factory Assignment.fromMap(Map<String, dynamic> json) => Assignment(
         date: json["date"],
         category: json["category"],
         assignmentName: json["assignment_name"],
@@ -37,7 +30,7 @@ class Assignment {
         psaid: json["psaid"],
       );
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toMap() => {
         "date": date,
         "category": category,
         "assignment_name": assignmentName,

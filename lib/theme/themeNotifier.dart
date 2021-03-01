@@ -55,7 +55,7 @@ class ThemeNotifier with ChangeNotifier  {
 
   void init() async {
     await DB.database;
-    var localTheme = DB.getLocal("theme");
+    String localTheme = DB.getLocal("theme");
     if (localTheme == "Light" || localTheme == "Dark") {
       _theme = localTheme;
     } else {

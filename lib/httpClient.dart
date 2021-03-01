@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:graderoom_app/database/generalModel.dart';
+import 'package:graderoom_app/database/settingsModel.dart';
 import 'package:graderoom_app/toaster.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -19,10 +21,12 @@ class HTTPClient {
   static const String cookiePath = ".cookies";
   static const String baseUrl = 'https://beta.graderoom.me';
   static const String loginPath = "/api/login";
-  static const String statusPath = "/api/status";
-  static const String checkUpdateBackgroundPath = "/checkUpdateBackground";
   static const String logoutPath = "/api/logout";
+  static const String statusPath = "/api/status";
+  static const String generalPath = "/api/general";
+  static const String gradesPath = "/api/grades";
   static const String settingsPath = "/api/settings";
+  static const String checkUpdateBackgroundPath = "/api/checkUpdateBackground";
 
   static final Map<String, dynamic> _defaultHeaders = {
     'connection': 'keep-alive',
@@ -49,7 +53,7 @@ class HTTPClient {
   }
 
   static Future<Cookie> get cookie async {
-    var _cookieJar = await cookieJar;
+    PersistCookieJar _cookieJar = await cookieJar;
     var cookies = _cookieJar.loadForRequest(loginUri);
     if (cookies.length != 0) {
       return (await cookieJar).loadForRequest(loginUri)[0];
@@ -155,8 +159,24 @@ class HTTPClient {
     return _sendRequest(Method.GET, statusPath, cookie: await cookie, referer: baseUrl, showToast: showToast, showLoading: showLoading);
   }
 
-  Future<Map<String, dynamic>> getSettings() async {
+  Future<General> getGeneral() async {
+    var response = await _sendRequest(Method.GET, generalPath, cookie: await cookie, referer: baseUrl);
+    if (response is Response && response.statusCode == 200) {
+      return General.fromMapOrResponse(json.decode(response.data));
+    }
+    return null;
+  }
+
+  Future<Settings> getSettings() async {
     var response = await _sendRequest(Method.GET, settingsPath, cookie: await cookie, referer: baseUrl);
+    if (response is Response && response.statusCode == 200) {
+      return Settings.fromMapOrResponse(json.decode(response.data));
+    }
+    return null;
+  }
+
+  Future<List<Map<String, dynamic>>> getGrades() async {
+    var response = await _sendRequest(Method.GET, gradesPath, cookie: await cookie, referer: baseUrl);
     if (response is Response && response.statusCode == 200) {
       return json.decode(response.data);
     }

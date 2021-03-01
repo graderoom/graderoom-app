@@ -9,7 +9,8 @@ import 'package:graderoom_app/extensions.dart';
 import 'package:graderoom_app/toaster.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sembast/sembast.dart';
+import 'package:sembast/sembast_io.dart';
 
 class DB {
   DB._();
@@ -17,6 +18,7 @@ class DB {
   static final DB db = DB._();
 
   static Database _database;
+  static StoreRef _store;
   static List<Map<String, dynamic>> _courseCache;
   static Map<String, dynamic> _settingsCache;
   static Map<String, dynamic> _localCache;
@@ -44,7 +46,7 @@ class DB {
 
   static Future<Database> get database async {
     if (_database == null) {
-      _database = await _openDB();
+      await _openDB();
     } else {
       await localCache;
       await courseCache;
@@ -58,193 +60,223 @@ class DB {
     return _courseCache.length;
   }
 
-  static _openDB() async {
+  static Future<void> _openDB() async {
     Directory docDir = await getApplicationDocumentsDirectory();
     String path = join(docDir.path, Constants.dbPath);
-    return await openDatabase(path, onOpen: (db) async {
-      _database = db;
-      await localCache;
-      await courseCache;
-      await settingsCache;
-    });
+    _database = await databaseFactoryIo.openDatabase(path);
+    _store = StoreRef<String, dynamic>.main();
+    await localCache;
+    await courseCache;
+    await settingsCache;
+    print("Opened new database");
   }
 
-  static _initCourses() async {
-    await _database.execute("CREATE TABLE IF NOT EXISTS Courses ("
-        "class_name TEXT,"
-        "teacher_name TEXT,"
-        "overall_percent,"
-        "overall_letter,"
-        "student_id TEXT,"
-        "section_id TEXT,"
-        "ps_locked INTEGER,"
-        "grades TEXT" // Store as json string
-        ")");
-    toastDebug("Created Course DB");
-  }
-
-  static _fixCourses() async {
-    Map<String, String> columnsAndTypes = Courses.sqlColumns;
-    List<String> columns =
-        List<String>.from((await _database.rawQuery("PRAGMA table_info(Courses)")).map((c) => c["name"].toString()));
-    columnsAndTypes.forEach((column, type) async {
-      if (!columns.contains(column)) {
-        await _database.rawQuery("ALTER TABLE Courses ADD COLUMN " + column + " " + type);
-      }
-    });
-  }
-
-  static _initSettings() async {
-    await _database.execute("CREATE TABLE IF NOT EXISTS Settings (" + Settings.sqlModel + ")");
-    toastDebug("Created Settings DB");
-  }
-
-  static _fixSettings() async {
-    Map<String, String> columnsAndTypes = Settings.sqlColumns;
-    List<String> columns =
-        List<String>.from((await _database.rawQuery("PRAGMA table_info(Settings)")).map((c) => c["name"].toString()));
-    columnsAndTypes.forEach((column, type) async {
-      if (!columns.contains(column)) {
-        await _database.rawQuery("ALTER TABLE Settings ADD COLUMN " + column + " " + type);
-      }
-    });
-  }
-
-  static _initLocal() async {
-    await _database.execute("CREATE TABLE IF NOT EXISTS Local ("
-        "theme TEXT"
-        "showDebugToasts INTEGER"
-        ")");
-    toastDebug("Created Local DB");
-  }
-
-  static _fixLocal() async {
-    Map<String, String> columnsAndTypes = Local.sqlColumns;
-    List<String> columns =
-        List<String>.from((await _database.rawQuery("PRAGMA table_info(Local)")).map((c) => c["name"].toString()));
-    columnsAndTypes.forEach((column, type) async {
-      if (!columns.contains(column)) {
-        await _database.rawQuery("ALTER TABLE Local ADD COLUMN " + column + " " + type);
-      }
-    });
-  }
-
-  static initCourseCache() async {
-    List<Map<String, dynamic>> courseList;
-    var db = _database;
-    if ((await db.query("sqlite_master", where: "name = ?", whereArgs: ["Courses"])).length == 0) {
-      await _initCourses();
-      db = await database;
+  static Future<void> _initCourses() async {
+    List<Map<String, dynamic>> courses = await _store.record("Courses").get(_database);
+    if (courses == null) {
+      await _store.record("Courses").put(_database, []);
+      toastDebug("Created Courses DB");
+    } else {
+      toastDebug("Courses DB already exists!");
     }
-    _fixCourses();
-    courseList = await db.rawQuery("SELECT * FROM Courses");
+  }
+
+  static Future<void> _fixCourses() async {
+    List<String> keys = Courses.keys;
+    List courses = await _store.record('Courses').get(_database);
+    for (var i = 0; i < courses.length; i++) {
+      var course = courses[i];
+      var currentKeys = course.keys.toList();
+      for (var j = 0; j < currentKeys.length; j++) {
+        if (keys.contains(currentKeys[j])) continue;
+        course.remove(currentKeys[j]);
+        print("Deleted " + currentKeys[j] + " from course " + j.toString());
+      }
+      for (var j = 0; j < keys.length; j++) {
+        if (currentKeys.contains(keys[j])) continue;
+        course[keys[j]] = null;
+        print("Added " + keys[j] + " to course " + j.toString());
+      }
+    }
+    await _store.record("Courses").put(_database, courses);
+  }
+
+  static Future<void> _initSettings() async {
+    Map<String, dynamic> settings = await _store.record("Settings").get(_database);
+    if (settings == null) {
+      await _store.record("Settings").put(_database, {});
+      toastDebug("Created Settings DB");
+    } else {
+      toastDebug("Settings DB already exists!");
+    }
+  }
+
+  static Future<void> _fixSettings() async {
+    List<String> keys = Settings.keys;
+    Map<String, dynamic> _settings = await _store.record('Settings').get(_database);
+    Map<String, dynamic> settings = {..._settings};
+    List<String> currentKeys = settings.keys.toList();
+    for (int j = 0; j < currentKeys.length; j++) {
+      if (keys.contains(currentKeys[j])) continue;
+      settings.remove(currentKeys[j]);
+      print("Deleted setting: " + currentKeys[j]);
+    }
+    for (int j = 0; j < keys.length; j++) {
+      if (currentKeys.contains(keys[j])) continue;
+      settings[keys[j]] = null;
+      print("Added setting: " + keys[j]);
+    }
+    await _store.record("Settings").put(_database, settings);
+  }
+
+  static Future<void> _initLocal() async {
+    Map<String, dynamic> local = await _store.record("Local").get(_database);
+    if (local == null) {
+      await _store.record("Local").put(_database, {});
+      toastDebug("Created Local DB");
+    } else {
+      toastDebug("Local DB already exists!");
+    }
+  }
+
+  static Future<void> _fixLocal() async {
+    List<String> keys = Local.keys;
+    Map<String, dynamic> _local = await _store.record('Local').get(_database);
+    Map<String, dynamic> local = {..._local};
+    List<String> currentKeys = local.keys.toList();
+    for (int j = 0; j < currentKeys.length; j++) {
+      if (keys.contains(currentKeys[j])) continue;
+      local.remove(currentKeys[j]);
+      print("Deleted local: " + currentKeys[j]);
+    }
+    for (int j = 0; j < keys.length; j++) {
+      if (currentKeys.contains(keys[j])) continue;
+      local[keys[j]] = null;
+      print("Added local: " + keys[j]);
+    }
+    await _store.record("Local").put(_database, local);
+  }
+
+  static Future<void> initCourseCache() async {
+    if (await _store.record("Courses").exists(_database)) {
+      _fixCourses();
+    } else {
+      _initCourses();
+    }
+    List courseList = await _store.record("Courses").get(_database);
+    courseList ??= [];
     _courseCache = [];
     for (Map<String, dynamic> course in courseList) {
-      _courseCache.add(Courses.fromJsonOrSql(course).toJson());
+      _courseCache.add(Courses.fromMapOrResponse(course).toMap());
     }
+
     print("Initialized Course Cache");
   }
 
-  static _initSettingsCache() async {
-    List<Map<String, dynamic>> _settings;
-    var db = _database;
-    if ((await db.query("sqlite_master", where: "name = ?", whereArgs: ["Settings"])).length == 0) {
-      await _initSettings();
-      db = await database;
+  static Future<void> _initSettingsCache() async {
+    if (await _store.record("Settings").exists(_database)) {
+      _fixSettings();
+    } else {
+      _initSettings();
     }
-    await _fixSettings();
-    _settings = await db.rawQuery("SELECT * FROM Settings ORDER BY ROWID ASC LIMIT 1");
+    Map<String, dynamic> _settings = await _store.record("Settings").get(_database);
+    Map<String, dynamic> settings = {..._settings};
+    _settingsCache = Settings.fromMapOrResponse(settings).toMap();
 
-    if (_settings.length > 0) {
-      Map<String, dynamic> settings = _settings[0];
-      _settingsCache = Settings.fromJsonOrSql({...settings}).toJson();
-      var appearance = _settingsCache["appearance"];
+    print("Initialized Settings Cache");
+
+    if (!(["Dark", "Light", "System"]).contains(_localCache["theme"])) {
+      var appearance = _settingsCache["appearance"] ?? {};
       var rawTheme = appearance["theme"];
       if (!(["dark", "light", "system"]).contains(rawTheme)) {
         rawTheme = "dark";
       }
-      if (!(["Dark", "Light", "System"]).contains(_localCache["theme"])) {
-        await DB.setLocal("theme", rawTheme.toString().capitalize());
-      }
-    } else {
-      _settingsCache = Map<String, dynamic>();
+      await DB.setLocal("theme", rawTheme.toString().capitalize());
     }
-    print("Initialized Settings Cache");
   }
 
-  static _initLocalCache() async {
-    List<Map<String, dynamic>> _local;
-    var db = _database;
-    if ((await db.query("sqlite_master", where: "name = ?", whereArgs: ["Local"])).length == 0) {
-      await _initLocal();
-      db = await database;
-    }
-    await _fixLocal();
-    _local = await db.rawQuery("SELECT * FROM Local ORDER BY ROWID ASC LIMIT 1");
-    if (_local.length > 0) {
-      Map<String, dynamic> local = _local[0];
-      _localCache = Local.fromJsonOrSql({...local}).toJson();
+  static Future<void> _initLocalCache() async {
+    if (await _store.record("Local").exists(_database)) {
+      _fixLocal();
     } else {
-      _localCache = Map<String, dynamic>();
+      _initLocal();
     }
+    Map<String, dynamic> local = await _store.record("Local").get(_database);
+    _localCache = Local.fromMap(local).toMap();
+
+    print("Initialized Local Cache");
+
     if (DB.getLocal("showDebugToasts") == null) {
       await DB.setLocal("showDebugToasts", false);
     }
     if (DB.getLocal("theme") == null) {
       await DB.setLocal("theme", "Dark");
     }
-    print("Initialized Local Cache");
   }
 
-  static _clearDB() async {
-    await _database.execute("DROP TABLE IF EXISTS Courses");
+  static Future<void> _clearCourses() async {
+    await _store.record("Courses").put(_database, []);
     _courseCache = [];
     toastDebug("Cleared Course DB");
   }
 
-  static _clearSettings() async {
-    await _database.execute("DROP TABLE IF EXISTS Settings");
-    _settingsCache = null;
+  static Future<void> _clearSettings() async {
+    await _store.record("Settings").put(_database, {});
+    _settingsCache = {};
     toastDebug("Cleared Settings DB");
   }
 
-  static _clearLocal() async {
-    await _database.execute("DROP TABLE IF EXISTS Local");
-    _localCache = null;
+  static Future<void> _clearLocal() async {
+    await _store.record("Local").put(_database, {});
+    _localCache = {};
     toastDebug("Cleared Local DB");
   }
 
-  static _addCourse(Courses newCourse) async {
-    var res = await _database.insert("Courses", newCourse.toSql());
-    _courseCache.add(newCourse.toJson());
+  static Future<void> _addCourse(Courses newCourse) async {
+    List<dynamic> _courses = await _store.record("Courses").get(_database);
+    List<dynamic> courses = [..._courses];
+    courses.add(newCourse.toMap());
+    await _store.record("Courses").put(_database, courses);
+    _courseCache.add(newCourse.toMap());
     toastDebug("Added course " + _courseCache.length.toString());
-    return res;
   }
 
-  static clearCourses() async {
-    await _clearDB();
-    await initCourseCache();
-  }
-
-  static writeSettings(Settings settings) async {
+  static Future<void> writeSettings(Settings settings) async {
     await database;
     await _clearSettings();
-    await _initSettingsCache();
-    await _database.insert("Settings", settings.toSql());
-    _settingsCache = settings.toJson();
+    await _store.record("Settings").put(_database, settings.toMap());
+    _settingsCache = settings.toMap();
     toastDebug("Saved Settings");
-    return _localCache;
   }
 
-  static writeCourses(String courseString) async {
+  static Future<void> writeCourses(List<Courses> courses) async {
     await database;
-    List<Courses> courses = coursesFromJsonString(courseString);
     if (numCourses > 0 && courses.length > 0) {
-      await clearCourses();
+      await _clearCourses();
     }
     for (Courses course in courses) {
       await _addCourse(course);
     }
+    toastDebug("Synced courses");
+  }
+
+  static Future<void> writeCoursesFromString(String courseString) async {
+    await database;
+    List<Courses> courses = coursesFromJsonString(courseString);
+    if (numCourses > 0 && courses.length > 0) {
+      await _clearCourses();
+    }
+    for (Courses course in courses) {
+      await _addCourse(course);
+    }
+    toastDebug("Synced courses");
+  }
+
+  static Future<void> writeLocal(Local local) async {
+    await database;
+    await _store.record("Local").put(_database, local.toMap());
+    _localCache = local.toMap();
+    print("Saved Local");
   }
 
   static Color getColor(int index) {
@@ -261,14 +293,14 @@ class DB {
     return null;
   }
 
-  static getSetting(String key) {
+  static dynamic getSetting(String key) {
     if (_settingsCache.containsKey(key)) {
       return _settingsCache[key];
     }
     return null;
   }
 
-  static getCourse(int index) {
+  static Map<String, dynamic> getCourse(int index) {
     if (_courseCache == null) return null;
     if (index != null && index < _courseCache.length) {
       return _courseCache[index];
@@ -276,25 +308,18 @@ class DB {
     return null;
   }
 
-  static writeLocal(Local local) async {
-    await database;
-    await _database.insert("Local", local.toSql());
-    _localCache = local.toJson();
-    print("Saved Local");
-  }
-
-  static setLocal(String key, dynamic value) async {
+  static Future<void> setLocal(String key, dynamic value) async {
     await database;
     _localCache[key] = value;
     if (key == "showDebugToasts" && value == true) {
       toastDebug("Here is an example of a debug toast");
     }
-    var _local = Local.fromJsonOrSql(_localCache);
+    var _local = Local.fromMap(_localCache);
     await writeLocal(_local);
     print("Saved local setting: " + key + " | " + value.toString());
   }
 
-  static getLocal(String key) {
+  static dynamic getLocal(String key) {
     if (_localCache == null) return null;
     if (_localCache.containsKey(key)) {
       return _localCache[key];
