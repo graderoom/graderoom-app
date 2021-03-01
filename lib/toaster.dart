@@ -18,7 +18,7 @@ toastDebug(String message, {int statusCode, bool toast = true}) {
   var timestamp = _timeFormat.format(DateTime.now());
   var msg = timestamp + " | " + message;
   print(msg);
-  if (!kReleaseMode && toast && DB.getLocal("showDebugToasts") == true) {
+  if (toast && DB.getLocal("showDebugToasts") == true) {
     var color;
     var duration;
     switch (statusCode) {
