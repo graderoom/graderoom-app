@@ -159,9 +159,9 @@ class DB {
 
   static Future<void> initCourseCache() async {
     if (await _store.record("Courses").exists(_database)) {
-      _fixCourses();
+      await _fixCourses();
     } else {
-      _initCourses();
+      await _initCourses();
     }
     List courseList = await _store.record("Courses").get(_database);
     courseList ??= [];
@@ -175,9 +175,9 @@ class DB {
 
   static Future<void> _initSettingsCache() async {
     if (await _store.record("Settings").exists(_database)) {
-      _fixSettings();
+      await _fixSettings();
     } else {
-      _initSettings();
+      await _initSettings();
     }
     Map<String, dynamic> _settings = await _store.record("Settings").get(_database);
     Map<String, dynamic> settings = {..._settings};
@@ -197,9 +197,9 @@ class DB {
 
   static Future<void> _initLocalCache() async {
     if (await _store.record("Local").exists(_database)) {
-      _fixLocal();
+      await _fixLocal();
     } else {
-      _initLocal();
+      await _initLocal();
     }
     Map<String, dynamic> local = await _store.record("Local").get(_database);
     _localCache = Local.fromMap(local).toMap();
