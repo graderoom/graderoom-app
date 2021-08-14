@@ -3,32 +3,28 @@ import 'dart:ui';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:graderoom_app/httpClient.dart';
 import 'package:graderoom_app/screens/forgotPasswordScreen.dart';
 import 'package:graderoom_app/screens/mainScreen.dart';
 import 'package:graderoom_app/screens/signupScreen.dart';
+import 'package:graderoom_app/screens/splashScreen.dart';
 import 'package:graderoom_app/theme/themeNotifier.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return KeyboardDismissOnTap(
-      child: LoginForm(),
-    );
+    return LoginForm();
   }
 }
 
 class LoginForm extends StatefulWidget {
   @override
-  LoginFormState createState() {
-    return LoginFormState();
-  }
+  _LoginFormState createState() => _LoginFormState();
 }
 
-class LoginFormState extends State<LoginForm> with WidgetsBindingObserver {
-  ThemeNotifier _themeNotifier;
+class _LoginFormState extends State<LoginForm> with WidgetsBindingObserver {
+  late ThemeNotifier _themeNotifier;
 
   final _formKey = GlobalKey<FormState>();
   final _node = FocusScopeNode();
@@ -37,11 +33,12 @@ class LoginFormState extends State<LoginForm> with WidgetsBindingObserver {
 
   Alignment childAlignment = Alignment.center;
   String loginMessage = "";
+  bool stayLoggedIn = true;
 
   @override
   void initState() {
     _initState();
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance?.addObserver(this);
     super.initState();
   }
 
@@ -50,7 +47,7 @@ class LoginFormState extends State<LoginForm> with WidgetsBindingObserver {
     _usernameController.dispose();
     _passwordController.dispose();
     _node.dispose();
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance?.removeObserver(this);
     super.dispose();
   }
 
@@ -61,7 +58,7 @@ class LoginFormState extends State<LoginForm> with WidgetsBindingObserver {
   }
 
   void _initState() async {
-    Response<dynamic> status = await HTTPClient().getStatus();
+    Response<dynamic>? status = await HTTPClient().getStatus();
     if (status?.statusCode == 200) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
@@ -72,9 +69,10 @@ class LoginFormState extends State<LoginForm> with WidgetsBindingObserver {
   }
 
   void _submit() async {
-    Response<dynamic> response = await HTTPClient().login(
+    Response<dynamic>? response = await HTTPClient().login(
       _usernameController.text,
       _passwordController.text,
+      stayLoggedIn,
     );
     if (response == null) return;
     if (response.statusCode == 200) {
@@ -97,12 +95,10 @@ class LoginFormState extends State<LoginForm> with WidgetsBindingObserver {
     _themeNotifier = Provider.of<ThemeNotifier>(context);
     _formKey.currentState?.validate();
     return Scaffold(
-      body: AnimatedContainer(
-        curve: Curves.easeOut,
-        duration: Duration(milliseconds: 400),
-        width: double.infinity,
-        height: double.infinity,
-        alignment: childAlignment,
+      body: RefreshIndicator(
+        onRefresh: () => Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => SplashScreen()),
+        ),
         child: Form(
           autovalidateMode: AutovalidateMode.onUserInteraction,
           key: _formKey,
@@ -149,18 +145,29 @@ class LoginFormState extends State<LoginForm> with WidgetsBindingObserver {
                             color: Theme.of(context).errorColor,
                           ),
                         ),
-                        AutofillGroup(
-                          child: Column(
-                            children: <Widget>[
-                              SizedBox(height: 30.0),
-                              _buildUsernameTF(_node),
-                              SizedBox(height: 30.0),
-                              _buildPasswordTF(),
-                              _buildForgotPasswordBtn(),
-                              _buildLoginBtn(),
-                              _buildSignupBtn(),
-                            ],
-                          ),
+                        Column(
+                          children: <Widget>[
+                            AutofillGroup(
+                              child: Column(
+                                children: <Widget>[
+                                  SizedBox(height: 30.0),
+                                  _buildUsernameTF(_node),
+                                  SizedBox(height: 30.0),
+                                  _buildPasswordTF(),
+                                ],
+                              ),
+                            ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                _buildStayLoggedInCheckbox(),
+                                _buildForgotPasswordBtn(),
+                              ],
+                            ),
+                            _buildLoginBtn(),
+                            _buildSignupBtn(),
+                          ],
                         ),
                       ],
                     ),
@@ -220,6 +227,29 @@ class LoginFormState extends State<LoginForm> with WidgetsBindingObserver {
             autofillHints: <String>[AutofillHints.password],
             controller: _passwordController,
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStayLoggedInCheckbox() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          "Stay Logged In",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Checkbox(
+          value: stayLoggedIn,
+          onChanged: (value) {
+            setState(() {
+              stayLoggedIn = value!;
+            });
+          },
         ),
       ],
     );

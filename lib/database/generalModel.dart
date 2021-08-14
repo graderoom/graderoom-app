@@ -4,15 +4,15 @@ import 'package:graderoom_app/database/courseModel.dart';
 
 class General {
   General({
-    this.termsAndSemesters,
-    this.term,
-    this.semester,
-    this.gradeData,
-    this.weightData,
-    this.addedAssignments,
-    this.editedAssignments,
-    this.gradeHistory,
-    this.relevantClassData,
+    required this.termsAndSemesters,
+    required this.term,
+    required this.semester,
+    required this.gradeData,
+    required this.weightData,
+    required this.addedAssignments,
+    required this.editedAssignments,
+    required this.gradeHistory,
+    required this.relevantClassData,
   });
 
   static final List<String> keys = [
@@ -29,7 +29,7 @@ class General {
   List<dynamic> termsAndSemesters;
   String term;
   String semester;
-  List<Courses> gradeData;
+  List<Course> gradeData;
   Map<String, dynamic> weightData;
   Map<String, dynamic> addedAssignments;
   Map<String, dynamic> editedAssignments;
@@ -62,7 +62,7 @@ class General {
       termsAndSemesters: _json["termsAndSemesters"] as List<dynamic>,
       term: _json["term"] as String,
       semester: _json["semester"] as String,
-      gradeData: _json["gradeData"] as List<Courses>,
+      gradeData: _json["gradeData"] as List<Course>,
       weightData: _json["weightData"] as Map<String, dynamic>,
       addedAssignments: _json["addedAssignments"] as Map<String, dynamic>,
       editedAssignments: _json["editedAssignments"] as Map<String, dynamic>,
@@ -72,14 +72,14 @@ class General {
   }
 
   Map<String, dynamic> toMap() => {
-    "termsAndSemesters": termsAndSemesters,
-    "term": term,
-    "semester": semester,
-    "gradeData": gradeData,
-    "weightData": weightData,
-    "addedAssignments": addedAssignments,
-    "editedAssignments": editedAssignments,
-    "gradeHistory": gradeHistory,
-    "relevantClassData": relevantClassData,
-  };
+        "termsAndSemesters": termsAndSemesters,
+        "term": term,
+        "semester": semester,
+        "gradeData": gradeData,
+        "weightData": weightData,
+        "addedAssignments": addedAssignments,
+        "editedAssignments": editedAssignments,
+        "gradeHistory": gradeHistory,
+        "relevantClassData": relevantClassData,
+      };
 }

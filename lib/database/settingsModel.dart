@@ -2,18 +2,18 @@ import 'dart:convert';
 
 class Settings {
   Settings({
-    this.username,
-    this.schoolUsername,
-    this.isAdmin,
-    this.personalInfo,
-    this.appearance,
-    this.alerts,
-    this.gradeSync,
-    this.sortingData,
-    this.beta,
-    this.betaFeatures,
-    this.sunset,
-    this.sunrise,
+    required this.username,
+    required this.schoolUsername,
+    required this.isAdmin,
+    required this.personalInfo,
+    required this.appearance,
+    required this.alerts,
+    required this.gradeSync,
+    required this.sortingData,
+    required this.beta,
+    required this.betaFeatures,
+    required this.sunset,
+    required this.sunrise,
   });
 
   static final List<String> keys = [

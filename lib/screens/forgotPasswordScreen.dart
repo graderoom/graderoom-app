@@ -11,29 +11,27 @@ class ForgotPasswordScreen extends StatelessWidget {
 
 class ForgotPassword extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() {
-    return ForgotPasswordState();
-  }
+  _ForgotPasswordState createState() => _ForgotPasswordState();
 }
 
-class ForgotPasswordState extends State<ForgotPassword> with WidgetsBindingObserver {
-  ThemeNotifier _themeNotifier;
+class _ForgotPasswordState extends State<ForgotPassword> with WidgetsBindingObserver {
+  ThemeNotifier? _themeNotifier;
 
   @override
   void initState() {
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance?.addObserver(this);
     super.initState();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance?.removeObserver(this);
     super.dispose();
   }
 
   @override
   void didChangePlatformBrightness() {
-    _themeNotifier.init();
+    _themeNotifier?.init();
     super.didChangePlatformBrightness();
   }
 
@@ -43,7 +41,7 @@ class ForgotPasswordState extends State<ForgotPassword> with WidgetsBindingObser
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(
-          color: _themeNotifier.iconColor,
+          color: _themeNotifier!.iconColor,
         ),
       ),
       body: Container(

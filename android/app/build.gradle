@@ -38,7 +38,7 @@ android {
 
     defaultConfig {
         applicationId "me.graderoom.app"
-        minSdkVersion 16
+        minSdkVersion 18
         targetSdkVersion 30
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName

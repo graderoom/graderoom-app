@@ -40,6 +40,14 @@
 <!-- ------------------------------------------------------------------------------------------- -->
 <!-- ------------------------------------------------------------------------------------------- -->
 
+## [Beta M-0.1.1] - 2020-03-02
+### Added
+- Pulling down on the login screen now refreshes the screen<ul>
+- It returns to the first stage of the app where a login is attempted with stored credentials</ul>
+
+### Fixed
+- Issues with courses with no graded assignments
+
 ## [Beta M-0.1.0] - 2020-02-28
 ### Added
 - Debug toasts can be enabled in settings

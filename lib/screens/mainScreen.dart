@@ -1,12 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:graderoom_app/database/courseModel.dart';
+import 'package:graderoom_app/database/dataModel.dart';
 import 'package:graderoom_app/database/db.dart';
 import 'package:graderoom_app/httpClient.dart';
+import 'package:graderoom_app/overlays/toaster.dart';
+import 'package:graderoom_app/screens/assignmentsScreen.dart';
 import 'package:graderoom_app/screens/loginScreen.dart';
 import 'package:graderoom_app/screens/settingsScreen.dart';
 import 'package:graderoom_app/theme/themeNotifier.dart';
-import 'package:graderoom_app/toaster.dart';
 import 'package:provider/provider.dart';
 
 class MainScreen extends StatelessWidget {
@@ -18,30 +21,37 @@ class MainScreen extends StatelessWidget {
 
 class Main extends StatefulWidget {
   @override
-  MainState createState() {
-    return MainState();
-  }
+  _MainState createState() => _MainState();
 }
 
-class MainState extends State<Main> with WidgetsBindingObserver {
-  ThemeNotifier _themeNotifier;
+class _MainState extends State<Main> with WidgetsBindingObserver {
+  late ThemeNotifier _themeNotifier;
 
   Future<void> _setupGeneral() async {
     var generalResponse = await HTTPClient().getGeneral();
-    var courses = generalResponse.gradeData;
-    await DB.writeCourses(courses);
-    setState(() {});
+    if (generalResponse != null) {
+      var courses = generalResponse.gradeData;
+      await DB.writeCourses(courses);
+      Data(courses, generalResponse.weightData);
+      setState(() {});
+    }
   }
 
   Future<void> _checkUpdateBackground() async {
     var settingsResponse = await HTTPClient().getSettings();
-    await DB.writeSettings(settingsResponse);
-    var grades;
-    await for (Response r in HTTPClient().checkUpdateBackgroundStream()) {
-      grades = r.data['grades'];
+    if (settingsResponse != null) {
+      await DB.writeSettings(settingsResponse);
+      var grades;
+      await for (Response? r in HTTPClient().checkUpdateBackgroundStream()) {
+        if (r != null) {
+          grades = r.data['grades'];
+        }
+      }
+      if (grades != null) {
+        await DB.writeCoursesFromString(grades);
+        setState(() {});
+      }
     }
-    await DB.writeCoursesFromString(grades);
-    setState(() {});
   }
 
   Future<void> _checkStatus() async {
@@ -61,13 +71,13 @@ class MainState extends State<Main> with WidgetsBindingObserver {
     _setupGeneral();
     _checkUpdateBackground();
     DB.database;
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance?.addObserver(this);
     super.initState();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance?.removeObserver(this);
     super.dispose();
   }
 
@@ -82,27 +92,46 @@ class MainState extends State<Main> with WidgetsBindingObserver {
     _themeNotifier = Provider.of<ThemeNotifier>(context);
     return WillPopScope(
       onWillPop: () async {
-        return showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: Text('Are you sure?'),
-                content: Text('Do you want to exit?'),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: Text('No'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(true),
-                    child: Text('Yes'),
-                  ),
-                ],
+        bool pop = false;
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Are you sure?'),
+            content: Text('Do you want to exit?'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  pop = false;
+                  Navigator.of(context).pop(false);
+                },
+                child: Text('No'),
               ),
-            ) ??
-            false;
+              TextButton(
+                onPressed: () {
+                  pop = true;
+                  Navigator.of(context).pop(true);
+                },
+                child: Text('Yes'),
+              ),
+            ],
+          ),
+        );
+        return pop;
       },
       child: Scaffold(
-        appBar: AppBar(
+        appBar: _themeNotifier.appBar(
+          context: context,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Image.asset(
+                _themeNotifier.logoPath,
+                alignment: Alignment.center,
+                scale: 15,
+              ),
+            ],
+          ),
           leading: Builder(
             builder: (context) => IconButton(
               icon: Icon(Icons.menu),
@@ -141,6 +170,22 @@ class MainState extends State<Main> with WidgetsBindingObserver {
     );
   }
 
+  void _openAssignmentsScreen(Course course, Color color, int index) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AssignmentsScreen(),
+        settings: RouteSettings(
+          arguments: {
+            "Course": course,
+            "Color": color,
+            "index": index,
+          },
+        ),
+      ),
+    );
+  }
+
   GestureDetector _buildOverviewGridCard(int index) {
     var course = DB.getCourse(index);
     var color = DB.getColor(index);
@@ -150,8 +195,10 @@ class MainState extends State<Main> with WidgetsBindingObserver {
     var className = course["class_name"];
     var overallPercent = course["overall_percent"];
     var overallLetter = course["overall_letter"];
+    if (([false, "CR"]).contains(overallPercent)) overallPercent = "N/A";
+    if (([false, "CR"]).contains(overallLetter)) overallLetter = "N/A";
     return GestureDetector(
-      onTap: () => toastDebug("Course $index tapped"),
+      onTap: () => _openAssignmentsScreen(Course.fromMapOrResponse(course), color, index),
       child: Card(
         margin: EdgeInsets.all(5.0),
         semanticContainer: true,

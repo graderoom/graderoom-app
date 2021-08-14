@@ -1,20 +1,22 @@
 import 'dart:convert';
 
-List<Courses> coursesFromJsonString(String str) {
+import 'assignmentModel.dart';
+
+List<Course> coursesFromJsonString(String? str) {
   if (str == null) return [];
-  return List<Courses>.from(json.decode(str).map((x) => Courses.fromMapOrResponse(x)));
+  return List<Course>.from(json.decode(str).map((x) => Course.fromMapOrResponse(x)));
 }
 
-class Courses {
-  Courses({
-    this.className,
-    this.teacherName,
-    this.overallPercent,
-    this.overallLetter,
-    this.studentId,
-    this.sectionId,
-    this.psLocked,
-    this.grades,
+class Course {
+  Course({
+    required this.className,
+    required this.teacherName,
+    required this.overallPercent,
+    required this.overallLetter,
+    required this.studentId,
+    required this.sectionId,
+    required this.psLocked,
+    required this.grades,
   });
 
   static final List<String> keys = [
@@ -35,13 +37,15 @@ class Courses {
   String studentId;
   String sectionId;
   bool psLocked;
-  List<dynamic> grades;
+  List<Assignment> grades;
 
-  factory Courses.fromMapOrResponse(Map<String, dynamic> _json) {
+  factory Course.fromMapOrResponse(Map<String, dynamic> _json) {
     if (_json["grades"] is String) {
-      _json["grades"] = json.encode(_json["grades"]) as List<dynamic>;
+      _json["grades"] = assignmentsFromJsonString(_json["grades"]);
+    } else if (!(_json["grades"] is List<Assignment>)) {
+      _json["grades"] = assignmentsFromJsonString(json.encode(_json["grades"]));
     }
-    return Courses(
+    return Course(
       className: _json["class_name"] as String,
       teacherName: _json["teacher_name"] as String,
       overallPercent: _json["overall_percent"] as dynamic,
@@ -49,7 +53,7 @@ class Courses {
       studentId: _json["student_id"] as String,
       sectionId: _json["section_id"] as String,
       psLocked: _json["ps_locked"] as bool,
-      grades: _json["grades"] as List<dynamic>,
+      grades: _json["grades"] as List<Assignment>,
     );
   }
 
@@ -61,6 +65,6 @@ class Courses {
         "student_id": studentId,
         "section_id": sectionId,
         "ps_locked": psLocked,
-        "grades": grades,
+        "grades": grades.map((x) => x.toMap()).toList(),
       };
 }

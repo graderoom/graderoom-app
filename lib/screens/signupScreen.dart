@@ -2,28 +2,26 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:graderoom_app/theme/themeNotifier.dart';
 import 'package:graderoom_app/screens/loginScreen.dart';
+import 'package:graderoom_app/theme/themeNotifier.dart';
 import 'package:provider/provider.dart';
 
 class SignupScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: LoginForm(),
+      body: SignupForm(),
     );
   }
 }
 
-class LoginForm extends StatefulWidget {
+class SignupForm extends StatefulWidget {
   @override
-  LoginFormState createState() {
-    return LoginFormState();
-  }
+  _SignupFormState createState() => _SignupFormState();
 }
 
-class LoginFormState extends State<LoginForm>  with WidgetsBindingObserver {
-  ThemeNotifier _themeNotifier;
+class _SignupFormState extends State<SignupForm> with WidgetsBindingObserver {
+  late ThemeNotifier _themeNotifier;
 
   @override
   void didChangePlatformBrightness() {
@@ -133,7 +131,7 @@ class LoginFormState extends State<LoginForm>  with WidgetsBindingObserver {
           decoration: _themeNotifier.textFieldBoxDecoration,
           height: 60.0,
           child: TextFormField(
-            decoration: _themeNotifier.textFieldInputDecoration.copyWith(
+            decoration: InputDecoration(
               border: InputBorder.none,
               prefixIcon: Icon(Icons.person),
               hintText: 'Enter a Username',
@@ -157,7 +155,7 @@ class LoginFormState extends State<LoginForm>  with WidgetsBindingObserver {
           height: 60.0,
           child: TextFormField(
             obscureText: true,
-            decoration: _themeNotifier.textFieldInputDecoration.copyWith(
+            decoration: InputDecoration(
               border: InputBorder.none,
               prefixIcon: Icon(Icons.lock),
               hintText: 'Enter a Password',
@@ -181,7 +179,7 @@ class LoginFormState extends State<LoginForm>  with WidgetsBindingObserver {
           height: 60.0,
           child: TextFormField(
             obscureText: true,
-            decoration: _themeNotifier.textFieldInputDecoration.copyWith(
+            decoration: InputDecoration(
               border: InputBorder.none,
               prefixIcon: Icon(Icons.lock),
               hintText: 'Confirm your Password',
@@ -204,7 +202,7 @@ class LoginFormState extends State<LoginForm>  with WidgetsBindingObserver {
           decoration: _themeNotifier.textFieldBoxDecoration,
           height: 60.0,
           child: TextFormField(
-            decoration: _themeNotifier.textFieldInputDecoration.copyWith(
+            decoration: InputDecoration(
               border: InputBorder.none,
               prefixIcon: Icon(Icons.mail_outline_rounded),
               hintText: 'Enter your school email',
@@ -227,7 +225,7 @@ class LoginFormState extends State<LoginForm>  with WidgetsBindingObserver {
           decoration: _themeNotifier.textFieldBoxDecoration,
           height: 60.0,
           child: TextFormField(
-            decoration: _themeNotifier.textFieldInputDecoration.copyWith(
+            decoration: InputDecoration(
               border: InputBorder.none,
               prefixIcon: Icon(Icons.vpn_key),
               hintText: 'Enter your beta key',
