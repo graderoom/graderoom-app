@@ -186,8 +186,8 @@ class _AssignmentsState extends State<AssignmentsScreen> {
                             ),
                           ],
                           lineTouchData: LineTouchData(
-                            touchCallback: (LineTouchResponse response) async {
-                              if (response.lineBarSpots == null) return;
+                            touchCallback: (FlTouchEvent event, LineTouchResponse? response) async {
+                              if (response == null) return;
                               await _scrollController.animateToIndex(
                                 response.lineBarSpots![0].spotIndex,
                                 duration: Duration(milliseconds: 250),
@@ -266,14 +266,14 @@ class _AssignmentsState extends State<AssignmentsScreen> {
                           titlesData: FlTitlesData(
                             show: true,
                             bottomTitles: SideTitles(
-                                getTextStyles: (value) => _themeNotifier.labelTextStyle,
+                                getTextStyles: (BuildContext context, double value) => _themeNotifier.labelTextStyle,
                                 showTitles: true,
                                 interval: 4 * 7 * 24 * 60 * 60 * 1000,
                                 getTitles: (value) {
                                   return DateFormat("MMMM").format(DateTime.fromMillisecondsSinceEpoch(value.round()));
                                 }),
                             leftTitles: SideTitles(
-                              getTextStyles: (value) => _themeNotifier.labelTextStyle,
+                              getTextStyles: (BuildContext context, double value) => _themeNotifier.labelTextStyle,
                               showTitles: true,
                               interval: 15.0,
                             ),
